@@ -18,7 +18,7 @@ export default function QuranWord({ word }: QuranWordProps) {
 
 const styles = StyleSheet.create({
   word: {
-    fontSize: 17,
+    fontSize: 18,
     writingDirection: 'rtl',
   },
   arabicNumber: {

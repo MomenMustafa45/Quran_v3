@@ -1,30 +1,38 @@
-import { View } from 'react-native';
 import React, { useEffect, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import { WebView } from 'react-native-webview';
 import { getPageData } from '../../../../utils/getPageData';
-import QuranLine from '../QuranLine/QuranLine';
 import { QuranPageData } from '../../../../types/quranPageData';
-import { styles } from './styles';
+import { buildPageHTML } from '../../../../utils/buildPageHTML';
 
 type QuranPageTypes = {
   pageId: number;
+  loadedFont: string;
 };
 
-const QuranPage = ({ pageId }: QuranPageTypes) => {
-  const [data, setData] = useState<QuranPageData | null>(null);
+const QuranPage = ({ pageId, loadedFont }: QuranPageTypes) => {
+  const [htmlContent, setHtmlContent] = useState<string>('');
 
   useEffect(() => {
-    getPageData(pageId).then(setData);
-  }, [pageId]);
-
-  const centerPage = pageId < 3 ? 'center' : undefined;
+    getPageData(pageId).then((data: QuranPageData) => {
+      const pageHtml = buildPageHTML(data, pageId, loadedFont);
+      setHtmlContent(pageHtml);
+    });
+  }, [pageId, loadedFont]);
 
   return (
-    <View style={[styles.pageContainer, { justifyContent: centerPage }]}>
-      {data?.lines?.map((line, index) => (
-        <QuranLine key={index} line={line} />
-      ))}
-    </View>
+    <WebView
+      originWhitelist={['*']}
+      source={{ html: htmlContent }}
+      style={styles.webview}
+    />
   );
 };
+
+const styles = StyleSheet.create({
+  webview: {
+    flex: 1,
+  },
+});
 
 export default QuranPage;
