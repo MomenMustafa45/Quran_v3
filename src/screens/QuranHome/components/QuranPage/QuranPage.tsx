@@ -25,7 +25,6 @@ const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageTypes) => {
   }, [pageId, loadedFont]);
 
   const handleWordClick = async (audioUrl: string) => {
-    console.log('🚀 ~ handleWordClick ~ audioUrl:', audioUrl.split('/'));
     if (!audioUrl) return;
 
     const fileName = audioUrl.split('/').pop(); // e.g., "003_078_002.mp3"
