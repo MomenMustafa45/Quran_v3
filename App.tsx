@@ -5,10 +5,19 @@
  * @format
  */
 
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import {
+  I18nManager,
+  StatusBar,
+  StyleSheet,
+  useColorScheme,
+  View,
+} from 'react-native';
 import AppContainer from './src/navigation';
 import BootSplash from 'react-native-bootsplash';
 import { useEffect } from 'react';
+
+I18nManager.allowRTL(true);
+I18nManager.forceRTL(true);
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';

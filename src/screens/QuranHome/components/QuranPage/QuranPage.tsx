@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { getPageData } from '../../../../utils/getPageData';
-import { QuranPageData } from '../../../../types/quranPageData';
+import { getPageData } from '../../../../database/getPageData';
+import { QuranPageData } from '../../../../database/types/quranPageData';
 import { buildPageHTML } from '../../../../utils/buildPageHTML';
 import RNFS from 'react-native-fs';
-import { downloadPageAudios } from '../../../../utils/downloadPageAudios';
+import { downloadPageAudios } from '../../../../database/downloadPageAudios';
 
 type QuranPageTypes = {
   pageId: number;

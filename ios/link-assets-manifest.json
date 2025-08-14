@@ -1,0 +1,13 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/UthmanTNB_v2-0.ttf",
+      "sha1": "bbf26780ec4e079b5a440f2a46378080d752600d"
+    },
+    {
+      "path": "assets/fonts/UthmanTN_v2-0.ttf",
+      "sha1": "b7f621480cd715885719fdbc5a16521447f4c7f3"
+    }
+  ]
+}

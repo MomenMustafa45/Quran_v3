@@ -4,11 +4,14 @@ import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
 import { loadFont } from '../../utils/loadFont';
 import Sound from 'react-native-sound';
+import { getSuras } from '../../database/getSuras';
+import { QuranSuraType } from '../../database/types/quranSuras';
 
 const { width } = Dimensions.get('window');
 
 const QuranHome = () => {
   const [loadedFont, setLoadedFont] = useState('');
+  const [suras, setSuras] = useState<QuranSuraType[]>([]);
 
   let currentSound: Sound | null = null;
 
@@ -45,14 +48,18 @@ const QuranHome = () => {
       setLoadedFont(font);
       // Do something with the loaded font
     };
-
+    const loadSuras = async () => {
+      const surasData = await getSuras();
+      setSuras(surasData);
+    };
+    loadSuras();
     loadFonts();
   }, []);
 
   return (
     <View style={styles.pageParent}>
       <FlatList
-        data={Array.from({ length: 660 }, (_, i) => i + 1)}
+        data={Array.from({ length: 604 }, (_, i) => i + 1)}
         keyExtractor={item => `quran-page-${item}`}
         renderItem={({ item }) => (
           <View style={styles.pageItem}>
@@ -64,7 +71,6 @@ const QuranHome = () => {
           </View>
         )}
         removeClippedSubviews={true}
-        inverted
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}

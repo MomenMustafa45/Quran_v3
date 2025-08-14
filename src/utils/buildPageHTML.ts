@@ -1,4 +1,4 @@
-import { QuranPageData } from '../types/quranPageData';
+import { QuranPageData } from '../database/types/quranPageData';
 
 export const buildPageHTML = (
   data: QuranPageData,
