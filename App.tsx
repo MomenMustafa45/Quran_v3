@@ -7,9 +7,22 @@
 
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import AppContainer from './src/navigation';
+import BootSplash from 'react-native-bootsplash';
+import { useEffect } from 'react';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+
+  useEffect(() => {
+    const init = async () => {
+      // …do multiple sync or async tasks
+    };
+
+    init().finally(async () => {
+      await BootSplash.hide({ fade: true });
+      console.log('BootSplash has been hidden successfully');
+    });
+  }, []);
 
   return (
     <View style={styles.container}>
