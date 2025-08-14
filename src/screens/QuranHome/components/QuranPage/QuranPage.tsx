@@ -1,17 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { getPageData } from '../../../../utils/getPageData';
 import { QuranPageData } from '../../../../types/quranPageData';
 import { buildPageHTML } from '../../../../utils/buildPageHTML';
+import RNFS from 'react-native-fs';
+import { downloadPageAudios } from '../../../../utils/downloadPageAudios';
 
 type QuranPageTypes = {
   pageId: number;
   loadedFont: string;
+  playSound: (filePath: string) => void;
 };
 
-const QuranPage = ({ pageId, loadedFont }: QuranPageTypes) => {
+const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageTypes) => {
   const [htmlContent, setHtmlContent] = useState<string>('');
+  const isDownloadingRef = useRef(false);
 
   useEffect(() => {
     getPageData(pageId).then((data: QuranPageData) => {
@@ -20,11 +24,37 @@ const QuranPage = ({ pageId, loadedFont }: QuranPageTypes) => {
     });
   }, [pageId, loadedFont]);
 
+  const handleWordClick = async (audioUrl: string) => {
+    console.log('🚀 ~ handleWordClick ~ audioUrl:', audioUrl.split('/'));
+    if (!audioUrl) return;
+
+    const fileName = audioUrl.split('/').pop(); // e.g., "003_078_002.mp3"
+    const localPath = RNFS.DocumentDirectoryPath + '/' + fileName;
+
+    const exists = await RNFS.exists(localPath);
+
+    if (exists) {
+      playSound(localPath);
+    } else {
+      console.log('File not found, downloading all audios for page...');
+      if (!isDownloadingRef.current) {
+        isDownloadingRef.current = true;
+        await downloadPageAudios(pageId);
+        isDownloadingRef.current = false;
+      }
+      playSound(localPath);
+    }
+  };
+
   return (
     <WebView
       originWhitelist={['*']}
       source={{ html: htmlContent }}
       style={styles.webview}
+      onMessage={event => {
+        handleWordClick(event.nativeEvent.data);
+        console.log('Word clicked:', event.nativeEvent.data);
+      }}
     />
   );
 };

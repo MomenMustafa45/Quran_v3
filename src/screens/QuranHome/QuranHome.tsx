@@ -3,11 +3,40 @@ import React, { useEffect, useState } from 'react';
 import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
 import { loadFont } from '../../utils/loadFont';
+import Sound from 'react-native-sound';
 
 const { width } = Dimensions.get('window');
 
 const QuranHome = () => {
   const [loadedFont, setLoadedFont] = useState('');
+
+  let currentSound: Sound | null = null;
+
+  const playSound = (filePath: string) => {
+    if (currentSound) {
+      currentSound.stop(() => {
+        currentSound?.release();
+        currentSound = null;
+      });
+    }
+
+    const sound = new Sound(filePath, '', error => {
+      if (error) {
+        console.error('Failed to load sound', error);
+        return;
+      }
+
+      currentSound = sound;
+
+      sound.play(success => {
+        if (!success) {
+          console.error('Playback failed');
+        }
+        sound.release();
+        currentSound = null;
+      });
+    });
+  };
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -27,7 +56,11 @@ const QuranHome = () => {
         keyExtractor={item => `quran-page-${item}`}
         renderItem={({ item }) => (
           <View style={styles.pageItem}>
-            <QuranPage pageId={item} loadedFont={loadedFont} />
+            <QuranPage
+              pageId={item}
+              loadedFont={loadedFont}
+              playSound={playSound}
+            />
           </View>
         )}
         removeClippedSubviews={true}

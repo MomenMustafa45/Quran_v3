@@ -4,7 +4,7 @@ import { QuranWordType } from '../types/quranWord';
 
 SQLite.enablePromise(true);
 
-let dbInstance = null;
+let dbInstance: SQLite.SQLiteDatabase | null = null;
 
 export async function openDB() {
   if (!dbInstance) {
