@@ -6,6 +6,7 @@ import { QuranPageData } from '../../../../database/types/quranPageData';
 import { buildPageHTML } from '../../../../utils/buildPageHTML';
 import RNFS from 'react-native-fs';
 import { downloadPageAudios } from '../../../../database/downloadPageAudios';
+import { COLORS } from '../../../../constants/colors';
 
 type QuranPageTypes = {
   pageId: number;
