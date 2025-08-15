@@ -29,6 +29,8 @@ const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageTypes) => {
     if (!audioUrl) return;
 
     const fileName = audioUrl.split('/').pop(); // e.g., "003_078_002.mp3"
+    const fileAyaName = fileName?.split('_').slice(0, 2).join('_'); // e.g., "003_078_002"
+    console.log('🚀 ~ handleWordClick ~ fileAyaName:', fileAyaName);
     const localPath = RNFS.DocumentDirectoryPath + '/' + fileName;
 
     const exists = await RNFS.exists(localPath);
@@ -52,7 +54,10 @@ const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageTypes) => {
       source={{ html: htmlContent }}
       style={styles.webview}
       onMessage={event => {
-        handleWordClick(event.nativeEvent.data);
+        const { audio, word, line } = JSON.parse(event.nativeEvent.data);
+        console.log('🚀 ~ line:', line);
+        console.log('🚀 ~ word:', word);
+        handleWordClick(audio);
         console.log('Word clicked:', event.nativeEvent.data);
       }}
     />

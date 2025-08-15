@@ -62,6 +62,7 @@ export const buildPageHTML = (
       <body>
         ${data?.lines
           ?.map(l => {
+            const lineId = `line-${l.line.line_id}`;
             if (l.line.line_type === 'surah_name') {
               return `
               <div class="surah_title">
@@ -151,7 +152,7 @@ ${l.line.sura_id || ''}  </text>
               return `<div class="line center"><span class="word">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</span></div>`;
             }
             return `
-            <div class="line ${
+            <div id="${lineId}" class="line ${
               l.line.is_centered === 1 ? 'center' : 'space-between'
             }">
             
@@ -160,6 +161,7 @@ ${l.line.sura_id || ''}  </text>
                   const isArabicNumber = /^[\u0660-\u0669]+$/.test(
                     String(w.text_uthmani),
                   );
+                  const wordId = `word-${w.word_id}`;
 
                   return `
                   ${
@@ -169,7 +171,7 @@ ${l.line.sura_id || ''}  </text>
                           w.text_uthmani
                         } &#x${'FD3F'};</span>
                       `
-                      : `<span class="word" onclick="window.ReactNativeWebView.postMessage('${w.audio_url}')">${w.text_uthmani}</span>`
+                      : `<span id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', line: '${lineId}' }))">${w.text_uthmani}</span>`
                   }
                   `;
                 })
