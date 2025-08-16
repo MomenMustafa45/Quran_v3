@@ -52,7 +52,6 @@ export const buildPageHTML = (
             width: 100%;
             white-space: nowrap;
             height:6.5vh;
-            background-color: red;
             justify-content: center;
             align-items: center;
             overflow: hidden;
@@ -161,7 +160,7 @@ ${l.line.sura_id || ''}  </text>
                   const isArabicNumber = /^[\u0660-\u0669]+$/.test(
                     String(w.text_uthmani),
                   );
-                  const wordId = `word-${w.word_id}`;
+                  const wordId = `${w.word_id}`;
 
                   return `
                   ${
@@ -171,7 +170,7 @@ ${l.line.sura_id || ''}  </text>
                           w.text_uthmani
                         } &#x${'FD3F'};</span>
                       `
-                      : `<span id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', line: '${lineId}' }))">${w.text_uthmani}</span>`
+                      : `<span id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', aya: '${w.ayat_id}' }))">${w.text_uthmani}</span>`
                   }
                   `;
                 })
