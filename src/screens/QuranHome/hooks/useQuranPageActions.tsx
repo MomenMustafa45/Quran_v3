@@ -1,8 +1,9 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { getWordsByAyaID } from '../../../database/getWordsByAyaID';
 import RNFS from 'react-native-fs';
-import { downloadPageAudios } from '../../../database/downloadPageAudios';
+import { downloadPageAudios } from '../../../database/downloadAudios';
 import WebView from 'react-native-webview';
+import Toast from 'react-native-toast-message';
 
 type useQuranPageActionsProps = {
   soundType?: 'ayah' | 'word';
@@ -19,6 +20,8 @@ const useQuranPageActions = ({
   pageId,
   playSound,
 }: useQuranPageActionsProps) => {
+  const [downloadProgress, setDownloadProgress] = useState<number>(0);
+
   const webViewRef = useRef<WebView>(null);
   const isDownloadingRef = useRef(false);
   const currentSoundRef = useRef<{ ayaId: number; wordId: string } | null>(
@@ -90,7 +93,19 @@ const useQuranPageActions = ({
     const exists = await RNFS.exists(localPath);
     if (!exists && !isDownloadingRef.current) {
       isDownloadingRef.current = true;
-      await downloadPageAudios(pageId);
+      try {
+        await downloadPageAudios(pageId, p => setDownloadProgress(p));
+      } catch (error) {
+        console.log('🚀 ~ handleWordClick ~ error:', error);
+        const errorMessage =
+          (error instanceof Error && error.message) ||
+          'Something went wrong while downloading this page audio.';
+        Toast.show({
+          type: 'error',
+          text1: 'Download failed',
+          text2: errorMessage,
+        });
+      }
       isDownloadingRef.current = false;
     }
 
@@ -116,6 +131,7 @@ const useQuranPageActions = ({
     handleWordClick,
     toggleHighlightAyaHandler,
     toggleHighlightWordHandler,
+    downloadProgress,
   };
 };
 

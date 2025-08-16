@@ -6,6 +6,7 @@ import {
   NativeSyntheticEvent,
 } from 'react-native';
 import Sound from 'react-native-sound';
+import Toast from 'react-native-toast-message';
 
 const { width } = Dimensions.get('window');
 
@@ -41,6 +42,13 @@ const useQuranHomeActions = () => {
 
     const sound = new Sound(filePath, '', error => {
       if (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to load sound',
+          text2:
+            error.message || 'Something went wrong while loading the sound.',
+          position: 'bottom',
+        });
         console.error('Failed to load sound', error);
         return;
       }

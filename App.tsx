@@ -15,6 +15,7 @@ import {
 import AppContainer from './src/navigation';
 import BootSplash from 'react-native-bootsplash';
 import { useEffect } from 'react';
+import Toast from 'react-native-toast-message';
 
 I18nManager.allowRTL(true);
 I18nManager.forceRTL(true);
@@ -37,6 +38,7 @@ function App() {
     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <AppContainer />
+      <Toast />
     </View>
   );
 }
