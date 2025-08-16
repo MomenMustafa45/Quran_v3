@@ -1,5 +1,5 @@
 import { View, FlatList, Dimensions } from 'react-native';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
 import { loadFont } from '../../utils/loadFont';
@@ -19,7 +19,6 @@ const QuranHome = () => {
   const [suras, setSuras] = useState<QuranSuraType[]>([]);
   const [juzs, setJuzs] = useState<QuranJuzType[]>([]);
   const [hezbs, setHezbs] = useState<QuranHezbType[]>([]);
-  console.log('🚀 ~ QuranHome ~ suras:', suras);
   const {
     currentPage,
     flatListRef,

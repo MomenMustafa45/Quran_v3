@@ -11,17 +11,33 @@ const { width } = Dimensions.get('window');
 
 const useQuranHomeActions = () => {
   const [currentPage, setCurrentPage] = useState(1);
-
-  let currentSound: Sound | null = null;
   const flatListRef = useRef<FlatList<number>>(null);
+  const currentSoundRef = useRef<Sound | null>(null);
+  const stopCallbackRef = useRef<(() => void) | null>(null); // 🔥 track highlight cleanup
 
-  const playSound = (filePath: string) => {
-    if (currentSound) {
-      currentSound.stop(() => {
-        currentSound?.release();
-        currentSound = null;
+  /** Stop any currently playing sound + clear highlight */
+  const stopCurrentSound = () => {
+    if (currentSoundRef.current) {
+      currentSoundRef.current.stop(() => {
+        currentSoundRef.current?.release();
+        currentSoundRef.current = null;
+
+        // remove highlight from last word/ayah
+        if (stopCallbackRef.current) {
+          stopCallbackRef.current();
+          stopCallbackRef.current = null;
+        }
       });
     }
+  };
+
+  /** Play sound and attach cleanup callback */
+  const playSound = (
+    filePath: string,
+    onFinished?: () => void,
+    onStop?: () => void, // 🔥 pass from QuranPage to remove highlights early
+  ) => {
+    stopCurrentSound();
 
     const sound = new Sound(filePath, '', error => {
       if (error) {
@@ -29,14 +45,15 @@ const useQuranHomeActions = () => {
         return;
       }
 
-      currentSound = sound;
+      currentSoundRef.current = sound;
+      stopCallbackRef.current = onStop || null;
 
       sound.play(success => {
-        if (!success) {
-          console.error('Playback failed');
-        }
+        if (onFinished) onFinished();
+        if (!success) console.error('Playback failed');
         sound.release();
-        currentSound = null;
+        currentSoundRef.current = null;
+        stopCallbackRef.current = null;
       });
     });
   };
@@ -52,14 +69,15 @@ const useQuranHomeActions = () => {
 
   const scrollToIndex = useCallback((pageNumber: number) => {
     if (!flatListRef.current) return;
-    // Convert page number to FlatList index (reverse order)
     const index = pageNumber - 1;
     flatListRef.current.scrollToIndex({ index, animated: true });
   }, []);
+
   return {
     currentPage,
     flatListRef,
     playSound,
+    stopCurrentSound,
     getCurrentPageIndex,
     scrollToIndex,
   };

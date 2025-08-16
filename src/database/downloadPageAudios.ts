@@ -28,11 +28,14 @@ export const downloadPageAudios = async (pageId: number) => {
     let activeDownloads: Promise<void | RNFS.DownloadResult>[] = [];
 
     for (const url of urls) {
+      console.log('🚀 ~ downloadPageAudios ~ url:', url);
       if (!url) continue; // Skip empty URLs
       const fileName = url.split('/').pop();
       const dest = RNFS.DocumentDirectoryPath + '/' + fileName;
+      console.log('🚀 ~ downloadPageAudios ~ dest:', dest);
 
       const exists = await RNFS.exists(dest);
+      console.log('🚀 ~ downloadPageAudios ~ exists:', exists);
       if (!exists) {
         const downloadPromise = RNFS.downloadFile({
           fromUrl: url,

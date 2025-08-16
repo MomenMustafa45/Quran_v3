@@ -1,64 +1,55 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { WebView } from 'react-native-webview';
+
 import { getPageData } from '../../../../database/getPageData';
 import { QuranPageData } from '../../../../database/types/quranPageData';
 import { buildPageHTML } from '../../../../utils/buildPageHTML';
-import RNFS from 'react-native-fs';
-import { downloadPageAudios } from '../../../../database/downloadPageAudios';
-import { COLORS } from '../../../../constants/colors';
+import useQuranPageActions from '../../hooks/useQuranPageActions';
 
-type QuranPageTypes = {
+type QuranPageProps = {
   pageId: number;
   loadedFont: string;
-  playSound: (filePath: string) => void;
+  playSound: (
+    filePath: string,
+    onFinished?: () => void,
+    onStop?: () => void,
+  ) => void;
+  soundType?: 'ayah' | 'word';
 };
 
-const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageTypes) => {
+const QuranPage = ({
+  pageId,
+  loadedFont,
+  playSound,
+  soundType = 'ayah',
+}: QuranPageProps) => {
   const [htmlContent, setHtmlContent] = useState<string>('');
-  const isDownloadingRef = useRef(false);
+  const { webViewRef, handleWordClick } = useQuranPageActions({
+    soundType,
+    pageId,
+    playSound,
+  });
 
+  /** Load HTML content for the page */
   useEffect(() => {
-    getPageData(pageId).then((data: QuranPageData) => {
+    const loadPage = async () => {
+      const data: QuranPageData = await getPageData(pageId);
       const pageHtml = buildPageHTML(data, pageId, loadedFont);
       setHtmlContent(pageHtml);
-    });
+    };
+    loadPage();
   }, [pageId, loadedFont]);
-
-  const handleWordClick = async (audioUrl: string) => {
-    if (!audioUrl) return;
-
-    const fileName = audioUrl.split('/').pop(); // e.g., "003_078_002.mp3"
-    const fileAyaName = fileName?.split('_').slice(0, 2).join('_'); // e.g., "003_078_002"
-    console.log('🚀 ~ handleWordClick ~ fileAyaName:', fileAyaName);
-    const localPath = RNFS.DocumentDirectoryPath + '/' + fileName;
-
-    const exists = await RNFS.exists(localPath);
-
-    if (exists) {
-      playSound(localPath);
-    } else {
-      console.log('File not found, downloading all audios for page...');
-      if (!isDownloadingRef.current) {
-        isDownloadingRef.current = true;
-        await downloadPageAudios(pageId);
-        isDownloadingRef.current = false;
-      }
-      playSound(localPath);
-    }
-  };
 
   return (
     <WebView
+      ref={webViewRef}
       originWhitelist={['*']}
       source={{ html: htmlContent }}
       style={styles.webview}
       onMessage={event => {
-        const { audio, word, line } = JSON.parse(event.nativeEvent.data);
-        console.log('🚀 ~ line:', line);
-        console.log('🚀 ~ word:', word);
-        handleWordClick(audio);
-        console.log('Word clicked:', event.nativeEvent.data);
+        const { audio, word, aya } = JSON.parse(event.nativeEvent.data);
+        handleWordClick(audio, word, aya);
       }}
     />
   );
