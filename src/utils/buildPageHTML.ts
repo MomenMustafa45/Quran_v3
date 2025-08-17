@@ -142,7 +142,7 @@ export const buildPageHTML = (
   <text x="600" y="165" text-anchor="middle"
         font-size="54" font-family="UthmanicHafs, 'Scheherazade New', serif"
         fill="#1b1b1b">
-${l.line.sura_id || ''}  </text>
+${l.line.surah_name || ''}  </text>
 </svg>
 </div>
 `;

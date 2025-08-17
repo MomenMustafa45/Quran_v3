@@ -5,6 +5,7 @@ export enum LINE_TYPES {
 }
 
 export type QuranLineType = {
+  surah_name: string;
   line_id: number;
   page_id: number;
   line_number: number;
