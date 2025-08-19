@@ -10,14 +10,16 @@ import { getJuzByPage } from '../../utils/getJuzByPage';
 import { styles } from './styles';
 import AppText from '../../../../components/AppText/AppText';
 import AppIcon from '../../../../components/AppIcon/AppIcon';
+import { useAppSelector } from '../../../../store/hooks/storeHooks';
 
 type HeaderProps = {
   suras: QuranSuraType[];
-  currentPage: number;
   juzs: QuranJuzType[];
 };
 
-const Header = ({ suras, currentPage, juzs }: HeaderProps) => {
+const Header = ({ suras, juzs }: HeaderProps) => {
+  const currentPage = useAppSelector(state => state.page.currentPage);
+  console.log('🚀 ~ Header ~ currentPage:', currentPage);
   const sura =
     currentPage > 400
       ? binarySearchSurah(suras, currentPage)
