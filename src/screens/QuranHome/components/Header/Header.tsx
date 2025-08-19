@@ -11,7 +11,6 @@ import { styles } from './styles';
 import AppText from '../../../../components/AppText/AppText';
 import AppIcon from '../../../../components/AppIcon/AppIcon';
 import { useAppSelector } from '../../../../store/hooks/storeHooks';
-import { useAppSelector } from '../../../../store/hooks/storeHooks';
 
 type HeaderProps = {
   suras: QuranSuraType[];
