@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef } from 'react';
 import {
   Dimensions,
   FlatList,
@@ -7,14 +7,18 @@ import {
 } from 'react-native';
 import Sound from 'react-native-sound';
 import Toast from 'react-native-toast-message';
+import { useAppDispatch } from '../../../store/hooks/storeHooks';
+import { setCurrentPage } from '../../../store/slices/pageSlice';
+import { setItem } from '../../../../storage';
+import { STORAGE_KEYS } from '../../../constants/storageKeys';
 
 const { width } = Dimensions.get('window');
 
 const useQuranHomeActions = () => {
-  const [currentPage, setCurrentPage] = useState(1);
   const flatListRef = useRef<FlatList<number>>(null);
   const currentSoundRef = useRef<Sound | null>(null);
   const stopCallbackRef = useRef<(() => void) | null>(null); // 🔥 track highlight cleanup
+  const dispatch = useAppDispatch();
 
   /** Stop any currently playing sound + clear highlight */
   const stopCurrentSound = () => {
@@ -70,9 +74,10 @@ const useQuranHomeActions = () => {
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const offsetX = event.nativeEvent.contentOffset.x;
       const currentIndex = Math.round(offsetX / width);
-      setCurrentPage(604 - currentIndex);
+      dispatch(setCurrentPage(currentIndex + 1));
+      setItem(STORAGE_KEYS.CURRENT_PAGE, currentIndex + 1);
     },
-    [],
+    [dispatch],
   );
 
   const scrollToIndex = useCallback((pageNumber: number) => {
@@ -82,7 +87,6 @@ const useQuranHomeActions = () => {
   }, []);
 
   return {
-    currentPage,
     flatListRef,
     playSound,
     stopCurrentSound,

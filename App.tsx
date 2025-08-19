@@ -5,39 +5,21 @@
  * @format
  */
 
-import {
-  I18nManager,
-  StatusBar,
-  StyleSheet,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import AppContainer from './src/navigation';
-import BootSplash from 'react-native-bootsplash';
-import { useEffect } from 'react';
 import Toast from 'react-native-toast-message';
-
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
+import { Provider } from 'react-redux';
+import { store } from './src/store/store';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
-  useEffect(() => {
-    const init = async () => {
-      // …do multiple sync or async tasks
-    };
-
-    init().finally(async () => {
-      await BootSplash.hide({ fade: true });
-      console.log('BootSplash has been hidden successfully');
-    });
-  }, []);
-
   return (
     <View style={styles.container}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContainer />
+      <Provider store={store}>
+        <AppContainer />
+      </Provider>
       <Toast />
     </View>
   );

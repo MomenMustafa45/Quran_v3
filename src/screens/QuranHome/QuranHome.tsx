@@ -11,6 +11,9 @@ import { getJuzs } from '../../database/getJuzs';
 import { QuranJuzType } from '../../database/types/qraunJuz';
 import { getHezbs } from '../../database/getHezbs';
 import { QuranHezbType } from '../../database/types/quranHezb';
+import BootSplash from 'react-native-bootsplash';
+import { getItem } from '../../../storage';
+import { STORAGE_KEYS } from '../../constants/storageKeys';
 
 const { width } = Dimensions.get('window');
 
@@ -19,43 +22,39 @@ const QuranHome = () => {
   const [suras, setSuras] = useState<QuranSuraType[]>([]);
   const [juzs, setJuzs] = useState<QuranJuzType[]>([]);
   const [hezbs, setHezbs] = useState<QuranHezbType[]>([]);
-  const {
-    currentPage,
-    flatListRef,
-    playSound,
-    getCurrentPageIndex,
-    scrollToIndex,
-  } = useQuranHomeActions();
+  const { flatListRef, playSound, getCurrentPageIndex, scrollToIndex } =
+    useQuranHomeActions();
 
   useEffect(() => {
-    const loadFonts = async () => {
+    const loadFontsAndData = async () => {
       const font = await loadFont();
       setLoadedFont(font);
-    };
-    const loadSurasAndJuzsAndHezbs = async () => {
       const surasData = await getSuras();
       const juzsData = await getJuzs();
       const hezbsData = await getHezbs();
       setHezbs(hezbsData);
       setJuzs(juzsData);
       setSuras(surasData);
+      const currentPage = getItem(STORAGE_KEYS.CURRENT_PAGE);
+      if (currentPage) {
+        scrollToIndex(Number(currentPage));
+      }
+      await BootSplash.hide({ fade: true });
     };
-
-    loadSurasAndJuzsAndHezbs();
-    loadFonts();
-  }, []);
+    loadFontsAndData();
+  }, [scrollToIndex]);
 
   return (
     <View style={styles.pageParent}>
-      <Header juzs={juzs} suras={suras} currentPage={currentPage} />
+      <Header juzs={juzs} suras={suras} />
       <FlatList
         ref={flatListRef}
         data={Array.from({ length: 604 }, (_, i) => i + 1)}
-        keyExtractor={item => `quran-page-${item}`}
-        renderItem={({ item }) => (
+        keyExtractor={item => item.toString()}
+        renderItem={({ index }) => (
           <View style={styles.pageItem}>
             <QuranPage
-              pageId={item}
+              pageId={index + 1}
               loadedFont={loadedFont}
               playSound={playSound}
             />
@@ -73,6 +72,7 @@ const QuranHome = () => {
           offset: width * index,
           index,
         })}
+        inverted
       />
     </View>
   );
