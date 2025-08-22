@@ -1,5 +1,5 @@
 import { View, FlatList, Dimensions } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
 import { loadFont } from '../../utils/loadFont';
@@ -20,7 +20,9 @@ import useQuranModals from './hooks/useQuranModals';
 const { width } = Dimensions.get('window');
 
 const QuranHome = () => {
-  const [loadedFont, setLoadedFont] = useState('');
+  const loadedFontRef = useRef<string>('');
+  const [fontReady, setFontReady] = useState(false);
+
   const [suras, setSuras] = useState<QuranSuraType[]>([]);
   const [juzs, setJuzs] = useState<QuranJuzType[]>([]);
   const [initialPage, setInitialPage] = useState<number | null>(null);
@@ -32,7 +34,6 @@ const QuranHome = () => {
   const {
     pageModal,
     hideModal,
-    hideAllModals,
     juzModal,
     searchModal,
     settingsModal,
@@ -49,7 +50,8 @@ const QuranHome = () => {
       }
 
       const font = await loadFont();
-      setLoadedFont(font);
+      loadedFontRef.current = font;
+      setFontReady(true);
 
       const [surasData, juzsData] = await Promise.all([getSuras(), getJuzs()]);
       setSuras(surasData);
@@ -58,7 +60,26 @@ const QuranHome = () => {
       await BootSplash.hide({ fade: true });
     };
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: number }) => (
+      <View style={styles.pageItem}>
+        <QuranPage
+          pageId={item}
+          loadedFont={loadedFontRef.current} // 🔥 stable forever
+          playSound={playSound}
+        />
+      </View>
+    ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  if (!fontReady) {
+    return null;
+  }
 
   return (
     <View style={styles.pageParent}>
@@ -67,23 +88,15 @@ const QuranHome = () => {
         ref={flatListRef}
         data={Array.from({ length: 604 }, (_, i) => i + 1)}
         initialScrollIndex={initialPage ? initialPage - 1 : 0}
-        keyExtractor={item => item.toString()}
-        renderItem={({ index }) => (
-          <View style={styles.pageItem}>
-            <QuranPage
-              pageId={index + 1}
-              loadedFont={loadedFont}
-              playSound={playSound}
-            />
-          </View>
-        )}
+        keyExtractor={item => `page-${item}`}
+        renderItem={renderItem}
         onMomentumScrollEnd={getCurrentPageIndex}
-        removeClippedSubviews={true}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         maxToRenderPerBatch={4}
         initialNumToRender={4}
+        updateCellsBatchingPeriod={4}
         getItemLayout={(_, index) => ({
           length: width,
           offset: width * index,
@@ -91,6 +104,7 @@ const QuranHome = () => {
         })}
         windowSize={3}
         inverted
+        removeClippedSubviews={true}
       />
 
       <PageModal

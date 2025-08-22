@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { getWordsByAyaID } from '../../../database/getWordsByAyaID';
 import RNFS from 'react-native-fs';
 import { downloadPageAudios } from '../../../database/downloadAudios';
@@ -29,103 +29,113 @@ const useQuranPageActions = ({
   );
 
   /** Highlight multiple words (ayah) */
-  const toggleHighlightAyaHandler = (
-    words: { word_id: number }[],
-    highlight = true,
-  ) => {
-    const jsCode = words
-      .map(
-        w =>
-          `document.getElementById('${w.word_id}').style.backgroundColor = '${
-            highlight ? 'rgba(255, 255, 0, 0.3)' : ''
-          }';`,
-      )
-      .join('');
-    webViewRef.current?.injectJavaScript(jsCode);
-  };
+  const toggleHighlightAyaHandler = useCallback(
+    (words: { word_id: number }[], highlight = true) => {
+      const jsCode = words
+        .map(
+          w =>
+            `document.getElementById('${w.word_id}').style.backgroundColor = '${
+              highlight ? 'rgba(255, 255, 0, 0.3)' : ''
+            }';`,
+        )
+        .join('');
+      webViewRef.current?.injectJavaScript(jsCode);
+    },
+    [],
+  );
 
   /** Highlight single word */
-  const toggleHighlightWordHandler = (wordId: string, highlight = true) => {
-    const jsCode = `document.getElementById('${wordId}').style.backgroundColor = '${
-      highlight ? 'rgba(255, 255, 0, 0.3)' : ''
-    }';`;
-    webViewRef.current?.injectJavaScript(jsCode);
-  };
+  const toggleHighlightWordHandler = useCallback(
+    (wordId: string, highlight = true) => {
+      const jsCode = `document.getElementById('${wordId}').style.backgroundColor = '${
+        highlight ? 'rgba(255, 255, 0, 0.3)' : ''
+      }';`;
+      webViewRef.current?.injectJavaScript(jsCode);
+    },
+    [],
+  );
 
   /** Play audio when a word is clicked */
-  const handleWordClick = async (
-    audioUrl: string,
-    wordId: string,
-    ayaId: number,
-  ) => {
-    if (!audioUrl) return;
+  const handleWordClick = useCallback(
+    async (audioUrl: string, wordId: string, ayaId: number) => {
+      if (!audioUrl) return;
 
-    const isAyahType = soundType === 'ayah';
+      const isAyahType = soundType === 'ayah';
 
-    // Remove previous highlights
-    if (currentSoundRef.current) {
+      // Remove previous highlights
+      if (currentSoundRef.current) {
+        if (isAyahType) {
+          const prevWords = await getWordsByAyaID(
+            currentSoundRef.current.ayaId,
+          );
+          toggleHighlightAyaHandler(prevWords, false);
+        } else {
+          toggleHighlightWordHandler(currentSoundRef.current.wordId, false);
+        }
+      }
+
+      currentSoundRef.current = { ayaId, wordId };
+
+      // Highlight current selection
+      let words: { word_id: number }[] = [];
       if (isAyahType) {
-        const prevWords = await getWordsByAyaID(currentSoundRef.current.ayaId);
-        toggleHighlightAyaHandler(prevWords, false);
+        words = await getWordsByAyaID(ayaId);
+        toggleHighlightAyaHandler(words, true);
       } else {
-        toggleHighlightWordHandler(currentSoundRef.current.wordId, false);
+        toggleHighlightWordHandler(wordId, true);
       }
-    }
 
-    currentSoundRef.current = { ayaId, wordId };
+      // Determine local file path
+      const fileName = audioUrl.split('/').pop();
+      const fileAyaName = fileName?.split('_').slice(0, 2).join('') + '.mp3';
+      const filePath = isAyahType ? fileAyaName : fileName;
+      const localPath = `${RNFS.DocumentDirectoryPath}/${filePath}`;
 
-    // Highlight current selection
-    let words: { word_id: number }[] = [];
-    if (isAyahType) {
-      words = await getWordsByAyaID(ayaId);
-      toggleHighlightAyaHandler(words, true);
-    } else {
-      toggleHighlightWordHandler(wordId, true);
-    }
-
-    // Determine local file path
-    const fileName = audioUrl.split('/').pop();
-    const fileAyaName = fileName?.split('_').slice(0, 2).join('') + '.mp3';
-    const filePath = isAyahType ? fileAyaName : fileName;
-    const localPath = `${RNFS.DocumentDirectoryPath}/${filePath}`;
-
-    // Check if file exists, otherwise download all audios for this page
-    const exists = await RNFS.exists(localPath);
-    if (!exists && !isDownloadingRef.current) {
-      isDownloadingRef.current = true;
-      try {
-        await downloadPageAudios(pageId, p => setDownloadProgress(p));
-      } catch (error) {
-        console.log('🚀 ~ handleWordClick ~ error:', error);
-        const errorMessage =
-          (error instanceof Error && error.message) ||
-          'Something went wrong while downloading this page audio.';
-        Toast.show({
-          type: 'error',
-          text1: 'Download failed',
-          text2: errorMessage,
-        });
+      // Check if file exists, otherwise download all audios for this page
+      const exists = await RNFS.exists(localPath);
+      if (!exists && !isDownloadingRef.current) {
+        isDownloadingRef.current = true;
+        try {
+          await downloadPageAudios(pageId, p => setDownloadProgress(p));
+        } catch (error) {
+          console.log('🚀 ~ handleWordClick ~ error:', error);
+          const errorMessage =
+            (error instanceof Error && error.message) ||
+            'Something went wrong while downloading this page audio.';
+          Toast.show({
+            type: 'error',
+            text1: 'Download failed',
+            text2: errorMessage,
+          });
+        }
+        isDownloadingRef.current = false;
       }
-      isDownloadingRef.current = false;
-    }
 
-    // Play sound and clear highlight after playback
-    playSound(
-      localPath,
-      () => {
-        // finished playing -> remove highlight
-        if (isAyahType) toggleHighlightAyaHandler(words, false);
-        else toggleHighlightWordHandler(wordId, false);
-        currentSoundRef.current = null;
-      },
-      () => {
-        // stopped early -> remove highlight
-        if (isAyahType) toggleHighlightAyaHandler(words, false);
-        else toggleHighlightWordHandler(wordId, false);
-        currentSoundRef.current = null;
-      },
-    );
-  };
+      // Play sound and clear highlight after playback
+      playSound(
+        localPath,
+        () => {
+          // finished playing -> remove highlight
+          if (isAyahType) toggleHighlightAyaHandler(words, false);
+          else toggleHighlightWordHandler(wordId, false);
+          currentSoundRef.current = null;
+        },
+        () => {
+          // stopped early -> remove highlight
+          if (isAyahType) toggleHighlightAyaHandler(words, false);
+          else toggleHighlightWordHandler(wordId, false);
+          currentSoundRef.current = null;
+        },
+      );
+    },
+    [
+      pageId,
+      playSound,
+      soundType,
+      toggleHighlightAyaHandler,
+      toggleHighlightWordHandler,
+    ],
+  );
   return {
     webViewRef,
     handleWordClick,

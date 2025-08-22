@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { WebView } from 'react-native-webview';
 import * as Progress from 'react-native-progress';
 
@@ -74,4 +74,4 @@ const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageProps) => {
   );
 };
 
-export default QuranPage;
+export default memo(QuranPage);

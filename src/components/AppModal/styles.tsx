@@ -1,4 +1,4 @@
-import { I18nManager, Platform, StyleSheet } from 'react-native';
+import { I18nManager, StyleSheet } from 'react-native';
 import { COLORS } from '../../constants/colors';
 import { fontSizes, paddings, radius } from '../../constants/desingSystem';
 

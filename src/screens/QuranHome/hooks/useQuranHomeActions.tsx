@@ -17,7 +17,7 @@ const { width } = Dimensions.get('window');
 const useQuranHomeActions = () => {
   const flatListRef = useRef<FlatList<number>>(null);
   const currentSoundRef = useRef<Sound | null>(null);
-  const stopCallbackRef = useRef<(() => void) | null>(null); // 🔥 track highlight cleanup
+  const stopCallbackRef = useRef<(() => void) | null>(null);
   const dispatch = useAppDispatch();
 
   /** Stop any currently playing sound + clear highlight */
@@ -37,38 +37,41 @@ const useQuranHomeActions = () => {
   };
 
   /** Play sound and attach cleanup callback */
-  const playSound = (
-    filePath: string,
-    onFinished?: () => void,
-    onStop?: () => void, // 🔥 pass from QuranPage to remove highlights early
-  ) => {
-    stopCurrentSound();
+  const playSound = useCallback(
+    (
+      filePath: string,
+      onFinished?: () => void,
+      onStop?: () => void, // 🔥 pass from QuranPage to remove highlights early
+    ) => {
+      stopCurrentSound();
 
-    const sound = new Sound(filePath, '', error => {
-      if (error) {
-        Toast.show({
-          type: 'error',
-          text1: 'Failed to load sound',
-          text2:
-            error.message || 'Something went wrong while loading the sound.',
-          position: 'bottom',
+      const sound = new Sound(filePath, '', error => {
+        if (error) {
+          Toast.show({
+            type: 'error',
+            text1: 'Failed to load sound',
+            text2:
+              error.message || 'Something went wrong while loading the sound.',
+            position: 'bottom',
+          });
+          console.error('Failed to load sound', error);
+          return;
+        }
+
+        currentSoundRef.current = sound;
+        stopCallbackRef.current = onStop || null;
+
+        sound.play(success => {
+          if (onFinished) onFinished();
+          if (!success) console.error('Playback failed');
+          sound.release();
+          currentSoundRef.current = null;
+          stopCallbackRef.current = null;
         });
-        console.error('Failed to load sound', error);
-        return;
-      }
-
-      currentSoundRef.current = sound;
-      stopCallbackRef.current = onStop || null;
-
-      sound.play(success => {
-        if (onFinished) onFinished();
-        if (!success) console.error('Playback failed');
-        sound.release();
-        currentSoundRef.current = null;
-        stopCallbackRef.current = null;
       });
-    });
-  };
+    },
+    [],
+  );
 
   const getCurrentPageIndex = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -77,19 +80,18 @@ const useQuranHomeActions = () => {
       dispatch(setCurrentPage(currentIndex + 1));
       setItem(STORAGE_KEYS.CURRENT_PAGE, currentIndex + 1);
     },
-    [dispatch],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
   );
 
-  const scrollToIndex = useCallback(
-    (pageNumber: number) => {
-      if (!flatListRef.current) return;
-      const offset = (pageNumber - 1) * width;
-      dispatch(setCurrentPage(pageNumber));
-      setItem(STORAGE_KEYS.CURRENT_PAGE, pageNumber);
-      flatListRef.current.scrollToOffset({ offset, animated: false });
-    },
-    [dispatch],
-  );
+  const scrollToIndex = useCallback((pageNumber: number) => {
+    if (!flatListRef.current) return;
+    const offset = (pageNumber - 1) * width;
+    dispatch(setCurrentPage(pageNumber));
+    setItem(STORAGE_KEYS.CURRENT_PAGE, pageNumber);
+    flatListRef.current.scrollToOffset({ offset, animated: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     flatListRef,
