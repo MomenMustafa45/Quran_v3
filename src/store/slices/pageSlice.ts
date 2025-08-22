@@ -1,7 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
+import { I18nManager } from 'react-native';
 
 export type SoundType = 'word' | 'ayah';
+
+const isRtl = I18nManager.isRTL;
 
 export interface PageState {
   currentPage: number;
@@ -9,7 +12,7 @@ export interface PageState {
 }
 
 const initialState: PageState = {
-  currentPage: 1,
+  currentPage: isRtl ? 604 : 1,
   soundType: 'word',
 };
 

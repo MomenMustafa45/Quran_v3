@@ -11,6 +11,7 @@ import { useAppDispatch } from '../../../store/hooks/storeHooks';
 import { setCurrentPage } from '../../../store/slices/pageSlice';
 import { setItem } from '../../../../storage';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
+import { getRTLPageNumber } from '../../../utils/getRLTPageNumber';
 
 const { width } = Dimensions.get('window');
 
@@ -77,21 +78,26 @@ const useQuranHomeActions = () => {
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const offsetX = event.nativeEvent.contentOffset.x;
       const currentIndex = Math.round(offsetX / width);
-      dispatch(setCurrentPage(currentIndex + 1));
-      setItem(STORAGE_KEYS.CURRENT_PAGE, currentIndex + 1);
+      const currentPageNumber = getRTLPageNumber(currentIndex);
+
+      dispatch(setCurrentPage(currentPageNumber));
+      setItem(STORAGE_KEYS.CURRENT_PAGE, currentPageNumber);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [dispatch],
   );
 
-  const scrollToIndex = useCallback((pageNumber: number) => {
-    if (!flatListRef.current) return;
-    const offset = (pageNumber - 1) * width;
-    dispatch(setCurrentPage(pageNumber));
-    setItem(STORAGE_KEYS.CURRENT_PAGE, pageNumber);
-    flatListRef.current.scrollToOffset({ offset, animated: false });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const scrollToIndex = useCallback(
+    (pageNumber: number) => {
+      if (!flatListRef.current) return;
+
+      const offset = (pageNumber - 1) * width;
+      dispatch(setCurrentPage(pageNumber));
+      setItem(STORAGE_KEYS.CURRENT_PAGE, pageNumber);
+
+      flatListRef.current?.scrollToOffset({ offset, animated: false });
+    },
+    [dispatch],
+  );
 
   return {
     flatListRef,

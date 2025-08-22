@@ -1,4 +1,4 @@
-import { View, FlatList, Dimensions } from 'react-native';
+import { View, FlatList, Dimensions, I18nManager } from 'react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
@@ -18,10 +18,10 @@ import PageModal from '../../components/modals/PageModal/PageModal';
 import useQuranModals from './hooks/useQuranModals';
 
 const { width } = Dimensions.get('window');
+const isRtl = I18nManager.isRTL;
 
 const QuranHome = () => {
   const loadedFontRef = useRef<string>('');
-  const [fontReady, setFontReady] = useState(false);
 
   const [suras, setSuras] = useState<QuranSuraType[]>([]);
   const [juzs, setJuzs] = useState<QuranJuzType[]>([]);
@@ -41,17 +41,20 @@ const QuranHome = () => {
     surasModal,
   } = useQuranModals();
 
+  const getSavedPaged = useCallback(() => {
+    const savedPage = getItem(STORAGE_KEYS.CURRENT_PAGE);
+    if (savedPage) {
+      dispatch(setCurrentPage(Number(savedPage)));
+      setInitialPage(Number(savedPage) - 1);
+    } else {
+      setInitialPage(0);
+    }
+  }, [dispatch]);
+
   useEffect(() => {
     const init = async () => {
-      const savedPage = getItem(STORAGE_KEYS.CURRENT_PAGE);
-      if (savedPage) {
-        dispatch(setCurrentPage(Number(savedPage)));
-        setInitialPage(Number(savedPage));
-      }
-
       const font = await loadFont();
       loadedFontRef.current = font;
-      setFontReady(true);
 
       const [surasData, juzsData] = await Promise.all([getSuras(), getJuzs()]);
       setSuras(surasData);
@@ -60,8 +63,8 @@ const QuranHome = () => {
       await BootSplash.hide({ fade: true });
     };
     init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    getSavedPaged();
+  }, [getSavedPaged]);
 
   const renderItem = useCallback(
     ({ item }: { item: number }) => (
@@ -73,21 +76,17 @@ const QuranHome = () => {
         />
       </View>
     ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [playSound],
   );
-
-  if (!fontReady) {
-    return null;
-  }
 
   return (
     <View style={styles.pageParent}>
       <Header juzs={juzs} suras={suras} showModal={showModal} />
+
       <FlatList
         ref={flatListRef}
         data={Array.from({ length: 604 }, (_, i) => i + 1)}
-        initialScrollIndex={initialPage ? initialPage - 1 : 0}
+        initialScrollIndex={initialPage}
         keyExtractor={item => `page-${item}`}
         renderItem={renderItem}
         onMomentumScrollEnd={getCurrentPageIndex}
@@ -103,7 +102,7 @@ const QuranHome = () => {
           index,
         })}
         windowSize={3}
-        inverted
+        inverted={!isRtl}
         removeClippedSubviews={true}
       />
 

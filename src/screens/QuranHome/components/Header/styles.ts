@@ -1,17 +1,12 @@
 import { I18nManager, StyleSheet } from 'react-native';
 import { COLORS } from '../../../../constants/colors';
-import {
-  margins,
-  paddings,
-  shadowStyle,
-} from '../../../../constants/desingSystem';
+import { margins, paddings } from '../../../../constants/desingSystem';
 
 export const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: I18nManager.isRTL ? 'row' : 'row-reverse',
     backgroundColor: COLORS.backgroundBeige,
     padding: paddings.sm,
-    ...shadowStyle,
   },
   rightIconsContainer: {
     flex: 1,

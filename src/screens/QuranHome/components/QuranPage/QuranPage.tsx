@@ -22,6 +22,7 @@ type QuranPageProps = {
 
 const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageProps) => {
   const [htmlContent, setHtmlContent] = useState<string>('');
+  const [isLoadingContent, setIsLoadingContent] = useState(true);
   const { webViewRef, handleWordClick, downloadProgress } = useQuranPageActions(
     {
       pageId,
@@ -32,12 +33,18 @@ const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageProps) => {
   /** Load HTML content for the page */
   useEffect(() => {
     const loadPage = async () => {
+      setIsLoadingContent(true);
       const data: QuranPageData = await getPageData(pageId);
       const pageHtml = buildPageHTML(data, pageId, loadedFont);
       setHtmlContent(pageHtml);
+      setIsLoadingContent(false);
     };
     loadPage();
   }, [pageId, loadedFont]);
+
+  if (isLoadingContent) {
+    return null;
+  }
 
   return (
     <>
@@ -74,4 +81,4 @@ const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageProps) => {
   );
 };
 
-export default memo(QuranPage);
+export default QuranPage;

@@ -67,14 +67,17 @@ const PageModal = ({
     return pagesMeta.filter(item => item.page === pageNum);
   };
 
+  const onClickPageHandler = ({ item }: { item: PageMeta }) => {
+    const selectItem = item.page;
+    onSelectPage(selectItem);
+    onClose(QuranModalTypes.Page);
+    setQuery('');
+  };
+
   const renderItem = ({ item }: { item: PageMeta }) => (
     <TouchableOpacity
       style={styles.item}
-      onPress={() => {
-        onSelectPage(item.page);
-        onClose(QuranModalTypes.Page);
-        setQuery('');
-      }}
+      onPress={() => onClickPageHandler({ item })}
     >
       <Text style={styles.pageText}>صفحة {item.page}</Text>
       <Text style={styles.surahText}>سورة: {item.surah}</Text>
