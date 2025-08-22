@@ -18,19 +18,12 @@ type QuranPageProps = {
     onFinished?: () => void,
     onStop?: () => void,
   ) => void;
-  soundType?: 'ayah' | 'word';
 };
 
-const QuranPage = ({
-  pageId,
-  loadedFont,
-  playSound,
-  soundType = 'word',
-}: QuranPageProps) => {
+const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageProps) => {
   const [htmlContent, setHtmlContent] = useState<string>('');
   const { webViewRef, handleWordClick, downloadProgress } = useQuranPageActions(
     {
-      soundType,
       pageId,
       playSound,
     },
@@ -74,6 +67,8 @@ const QuranPage = ({
           const { audio, word, aya } = JSON.parse(event.nativeEvent.data);
           handleWordClick(audio, word, aya);
         }}
+        setSupportMultipleWindows={false}
+        androidLayerType="hardware"
       />
     </>
   );

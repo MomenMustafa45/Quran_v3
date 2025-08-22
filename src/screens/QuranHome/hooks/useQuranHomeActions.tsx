@@ -80,11 +80,16 @@ const useQuranHomeActions = () => {
     [dispatch],
   );
 
-  const scrollToIndex = useCallback((pageNumber: number) => {
-    if (!flatListRef.current) return;
-    const index = pageNumber - 1;
-    flatListRef.current.scrollToIndex({ index, animated: true });
-  }, []);
+  const scrollToIndex = useCallback(
+    (pageNumber: number) => {
+      if (!flatListRef.current) return;
+      const offset = (pageNumber - 1) * width;
+      dispatch(setCurrentPage(pageNumber));
+      setItem(STORAGE_KEYS.CURRENT_PAGE, pageNumber);
+      flatListRef.current.scrollToOffset({ offset, animated: false });
+    },
+    [dispatch],
+  );
 
   return {
     flatListRef,

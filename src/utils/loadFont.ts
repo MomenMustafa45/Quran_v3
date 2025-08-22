@@ -6,10 +6,10 @@ export const loadFont = async () => {
 
   if (Platform.OS === 'android') {
     // Copy from assets to DocumentDirectory
-    const destPath = `${RNFS.DocumentDirectoryPath}/UthmanTNB_v2-0.ttf`;
+    const destPath = `${RNFS.DocumentDirectoryPath}/Uthmanic-HAFS.otf`;
 
     try {
-      const assetPath = 'fonts/UthmanTNB_v2-0.ttf';
+      const assetPath = 'fonts/Uthmanic-HAFS.otf';
       await RNFS.copyFileAssets(assetPath, destPath);
       fontBase64 = await RNFS.readFile(destPath, 'base64');
     } catch (err) {
@@ -17,7 +17,7 @@ export const loadFont = async () => {
     }
   } else {
     // iOS can read directly from MainBundlePath
-    const fontPath = `${RNFS.MainBundlePath}/UthmanTNB_v2-0.ttf`;
+    const fontPath = `${RNFS.MainBundlePath}/Uthmanic-HAFS.otf`;
     fontBase64 = await RNFS.readFile(fontPath, 'base64');
   }
 

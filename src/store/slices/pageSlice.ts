@@ -1,12 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+export type SoundType = 'word' | 'ayah';
+
 export interface PageState {
   currentPage: number;
+  soundType: SoundType;
 }
 
 const initialState: PageState = {
   currentPage: 1,
+  soundType: 'word',
 };
 
 export const pageSlice = createSlice({
@@ -16,10 +20,13 @@ export const pageSlice = createSlice({
     setCurrentPage: (state, action: PayloadAction<number>) => {
       state.currentPage = action.payload;
     },
+    setSoundType: (state, action: PayloadAction<SoundType>) => {
+      state.soundType = action.payload;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { setCurrentPage } = pageSlice.actions;
+export const { setCurrentPage, setSoundType } = pageSlice.actions;
 
 export default pageSlice.reducer;

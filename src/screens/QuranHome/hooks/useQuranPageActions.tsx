@@ -4,9 +4,9 @@ import RNFS from 'react-native-fs';
 import { downloadPageAudios } from '../../../database/downloadAudios';
 import WebView from 'react-native-webview';
 import Toast from 'react-native-toast-message';
+import { useAppSelector } from '../../../store/hooks/storeHooks';
 
 type useQuranPageActionsProps = {
-  soundType?: 'ayah' | 'word';
   pageId: number;
   playSound: (
     filePath: string,
@@ -16,11 +16,11 @@ type useQuranPageActionsProps = {
 };
 
 const useQuranPageActions = ({
-  soundType,
   pageId,
   playSound,
 }: useQuranPageActionsProps) => {
   const [downloadProgress, setDownloadProgress] = useState<number>(0);
+  const soundType = useAppSelector(state => state.page.soundType);
 
   const webViewRef = useRef<WebView>(null);
   const isDownloadingRef = useRef(false);

@@ -1,46 +1,93 @@
 import { View } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { QuranSuraType } from '../../../../database/types/quranSuras';
-import {
-  binarySearchSurah,
-  linearSearchSurah,
-} from '../../utils/getSurahByPage';
+import { linearSearchSurah } from '../../utils/getSurahByPage';
 import { QuranJuzType } from '../../../../database/types/qraunJuz';
 import { getJuzByPage } from '../../utils/getJuzByPage';
 import { styles } from './styles';
-import AppText from '../../../../components/AppText/AppText';
-import AppIcon from '../../../../components/AppIcon/AppIcon';
-import { useAppSelector } from '../../../../store/hooks/storeHooks';
+import {
+  useAppDispatch,
+  useAppSelector,
+} from '../../../../store/hooks/storeHooks';
+import AppButton from '../../../../components/AppButton/AppButton';
+import { getItem, setItem } from '../../../../../storage';
+import { STORAGE_KEYS } from '../../../../constants/storageKeys';
+import { setSoundType, SoundType } from '../../../../store/slices/pageSlice';
+import { QuranModalTypes } from '../../hooks/useQuranModals';
 
 type HeaderProps = {
   suras: QuranSuraType[];
   juzs: QuranJuzType[];
+  showModal: (key: QuranModalTypes) => void;
 };
 
-const Header = ({ suras, juzs }: HeaderProps) => {
+const Header = ({ suras, juzs, showModal }: HeaderProps) => {
   const currentPage = useAppSelector(state => state.page.currentPage);
-  const sura =
-    currentPage > 400
-      ? binarySearchSurah(suras, currentPage)
-      : linearSearchSurah(suras, currentPage);
+  const soundType = useAppSelector(state => state.page.soundType);
+  const dispatch = useAppDispatch();
+  const sura = linearSearchSurah(suras, currentPage);
 
   const juz = getJuzByPage(juzs, currentPage);
+
+  const switchSoundTypeHandler = () => {
+    const switchedSoundType = soundType === 'word' ? 'ayah' : 'word';
+    setItem(STORAGE_KEYS.SOUND_TYPE, switchedSoundType);
+    dispatch(setSoundType(switchedSoundType));
+  };
+
+  const getInitialSoundType = () => {
+    const storageSoundType = getItem(STORAGE_KEYS.SOUND_TYPE);
+    if (storageSoundType) {
+      dispatch(setSoundType(String(storageSoundType) as SoundType));
+    }
+  };
+
+  useEffect(() => {
+    getInitialSoundType();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <View style={styles.headerContainer}>
       {/* right */}
-      <View style={styles.rightIconsContainer}>
-        <AppIcon name="" type="MaterialCommunityIcons" />
+      <View style={styles.btnsContainer}>
+        <AppButton
+          iconName="menu-book"
+          iconType="MaterialIcons"
+          title={currentPage.toString()}
+          onPress={() => showModal(QuranModalTypes.Page)}
+        />
+        <AppButton
+          iconName="note-text-outline"
+          iconType="MaterialCommunityIcons"
+          title={sura.result?.name_arabic}
+          onPress={() => {}}
+        />
+        <AppButton
+          iconName="layers-outline"
+          iconType="Ionicons"
+          title={juz?.juz_number.toString()}
+          onPress={() => {}}
+        />
+        <AppButton
+          iconName="sound"
+          iconType="AntDesign"
+          title={soundType === 'word' ? 'كلمة' : 'ايه'}
+          onPress={switchSoundTypeHandler}
+        />
+        <AppButton
+          iconName="search"
+          iconType="MaterialIcons"
+          title={'البحث'}
+          onPress={() => {}}
+        />
+        <AppButton
+          iconName="setting"
+          iconType="AntDesign"
+          title={'الاعدادات'}
+          onPress={() => {}}
+        />
       </View>
-      <View style={styles.suraInfoContainer}>
-        <View>
-          <AppText>{sura.result?.name_arabic}</AppText>
-        </View>
-        <View></View>
-      </View>
-
-      {/* left */}
-      <View style={styles.leftIconsContainer}></View>
     </View>
   );
 };

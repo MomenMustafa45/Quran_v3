@@ -43,9 +43,9 @@ export const buildPageHTML = (
             justify-content: space-between;
           }
           .word {
-            font-size: 4.8vw;
+            font-size: 4.7vw;
             white-space: nowrap;
-        
+            font-weight:bold;
           }
             .surah_title{
             display: flex;
@@ -157,21 +157,10 @@ ${l.line.surah_name || ''}  </text>
             
               ${l.words
                 .map(w => {
-                  const isArabicNumber = /^[\u0660-\u0669]+$/.test(
-                    String(w.text_uthmani),
-                  );
                   const wordId = `${w.word_id}`;
 
                   return `
-                  ${
-                    isArabicNumber
-                      ? `
-                      <span class="word">&#x${'FD3E'}; ${
-                          w.text_uthmani
-                        } &#x${'FD3F'};</span>
-                      `
-                      : `<span id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', aya: '${w.ayat_id}' }))">${w.text_uthmani}</span>`
-                  }
+                  ${`<span id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', aya: '${w.ayat_id}' }))">${w.text_uthmani}</span>`}
                   `;
                 })
                 .join(' ')}
