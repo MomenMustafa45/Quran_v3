@@ -33,14 +33,14 @@ export const buildPageHTML = (
   100% {opacity: 1;}
   } 
           body {
-            margin: 2rem 3rem;
             display: flex;
             flex-direction: column;
             justify-content: ${centerPage};
             background-color: #fff;
             font-family: 'UthmaniHafs';
             flex: 1;
-                      }
+            padding:0 4vw;
+ }
           .line {
             display: flex;
             flex-direction: row-reverse;
@@ -56,7 +56,7 @@ export const buildPageHTML = (
             justify-content: space-between;
           }
           .word {
-            font-size: clamp(4vw, 4.6vw, 5vw);
+            font-size: 5.0vw;
             white-space: nowrap;
             font-weight:bold;
           }

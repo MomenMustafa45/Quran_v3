@@ -9,6 +9,7 @@ import useQuranPageActions from '../../hooks/useQuranPageActions';
 import { COLORS } from '../../../../constants/colors';
 import AppText from '../../../../components/AppText/AppText';
 import { styles } from './styles';
+import { View } from 'react-native';
 
 type QuranPageProps = {
   pageId: number;
@@ -65,18 +66,20 @@ const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageProps) => {
           style={styles.progressBar}
         />
       )}
-      <WebView
-        ref={webViewRef}
-        originWhitelist={['*']}
-        source={{ html: htmlContent }}
-        style={styles.webview}
-        onMessage={event => {
-          const { audio, word, aya } = JSON.parse(event.nativeEvent.data);
-          handleWordClick(audio, word, aya);
-        }}
-        setSupportMultipleWindows={false}
-        androidLayerType="hardware"
-      />
+      <View style={styles.pageParent}>
+        <WebView
+          ref={webViewRef}
+          originWhitelist={['*']}
+          source={{ html: htmlContent }}
+          style={styles.webview}
+          onMessage={event => {
+            const { audio, word, aya } = JSON.parse(event.nativeEvent.data);
+            handleWordClick(audio, word, aya);
+          }}
+          setSupportMultipleWindows={false}
+          androidLayerType="hardware"
+        />
+      </View>
     </>
   );
 };
