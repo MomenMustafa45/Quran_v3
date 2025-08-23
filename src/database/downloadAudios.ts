@@ -63,6 +63,7 @@ export const downloadPageAudios = async (
           text2: errorMessage,
         });
         console.error('Download error', url, err);
+        onProgress?.(0);
       }
     };
 
