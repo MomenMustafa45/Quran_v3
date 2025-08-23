@@ -7,81 +7,52 @@ import {
   TextInput,
 } from 'react-native';
 import AppModal from '../../AppModal/AppModal';
-import { QuranSuraType } from '../../../database/types/quranSuras';
-import { QuranJuzType } from '../../../database/types/qraunJuz';
 import { QuranModalTypes } from '../../../screens/QuranHome/hooks/useQuranModals';
-import {
-  binarySearchSurah,
-  linearSearchSurah,
-} from '../../../screens/QuranHome/utils/getSurahByPage';
-import { getJuzByPage } from '../../../screens/QuranHome/utils/getJuzByPage';
+import { getPages } from '../../../database/getPages';
+import { QuranMenuPageType } from '../../../database/types/quranPageData';
 
 type PageModalProps = {
   visible: boolean;
   onClose: (key: QuranModalTypes) => void;
   onSelectPage: (page: number) => void;
-  suras: QuranSuraType[];
-  juzs: QuranJuzType[];
 };
 
-type PageMeta = {
-  page: number;
-  surah: string | undefined;
-  juz: number | undefined;
-};
-
-const PageModal = ({
-  visible,
-  onClose,
-  onSelectPage,
-  suras,
-  juzs,
-}: PageModalProps) => {
-  const [pagesMeta, setPagesMeta] = useState<PageMeta[]>([]);
+const PageModal = ({ visible, onClose, onSelectPage }: PageModalProps) => {
+  const [pagesMeta, setPagesMeta] = useState<QuranMenuPageType[]>([]);
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    const loadData = () => {
-      const meta: PageMeta[] = Array.from({ length: 604 }, (_, i) => {
-        const page = i + 1;
-        const surah =
-          page > 400
-            ? binarySearchSurah(suras, page).result?.name_arabic
-            : linearSearchSurah(suras, page).result?.name_arabic;
+    const loadData = async () => {
+      const getPagesData = await getPages();
 
-        const juz = getJuzByPage(juzs, page)?.juz_number;
-
-        return { page, surah, juz };
-      });
-
-      setPagesMeta(meta);
+      setPagesMeta(getPagesData);
     };
 
     loadData();
-  }, [juzs, suras]);
+  }, []);
 
   const filteredData = () => {
     if (!query.trim()) return pagesMeta;
     const pageNum = Number(query);
     if (isNaN(pageNum)) return [];
-    return pagesMeta.filter(item => item.page === pageNum);
+    return pagesMeta.filter(item => item.page_number === pageNum);
   };
 
-  const onClickPageHandler = ({ item }: { item: PageMeta }) => {
-    const selectItem = item.page;
+  const onClickPageHandler = ({ item }: { item: QuranMenuPageType }) => {
+    const selectItem = item.page_number;
     onSelectPage(selectItem);
     onClose(QuranModalTypes.Page);
     setQuery('');
   };
 
-  const renderItem = ({ item }: { item: PageMeta }) => (
+  const renderItem = ({ item }: { item: QuranMenuPageType }) => (
     <TouchableOpacity
       style={styles.item}
       onPress={() => onClickPageHandler({ item })}
     >
-      <Text style={styles.pageText}>صفحة {item.page}</Text>
-      <Text style={styles.surahText}>سورة: {item.surah}</Text>
-      <Text style={styles.juzText}>جزء {item.juz}</Text>
+      <Text style={styles.pageText}>صفحة {item.page_number}</Text>
+      <Text style={styles.surahText}>سورة: {item.surah_name}</Text>
+      <Text style={styles.juzText}>جزء {item.juz_id}</Text>
     </TouchableOpacity>
   );
 
@@ -102,7 +73,7 @@ const PageModal = ({
 
       <FlatList
         data={filteredData()}
-        keyExtractor={item => item.page.toString()}
+        keyExtractor={item => item.page_id.toString()}
         renderItem={renderItem}
         initialNumToRender={20}
         maxToRenderPerBatch={20}
