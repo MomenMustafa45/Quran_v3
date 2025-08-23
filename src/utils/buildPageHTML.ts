@@ -16,6 +16,22 @@ export const buildPageHTML = (
             font-family: 'UthmaniHafs';
             src: url(data:font/truetype;base64,${loadedFont}) format('truetype');
           }
+          .fadeIn {
+  -webkit-animation-name: fadeIn;
+  animation-name: fadeIn;
+  -webkit-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+  }
+  @-webkit-keyframes fadeIn {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+  }
+  @keyframes fadeIn {
+  0% {opacity: 0;}
+  100% {opacity: 1;}
+  } 
           body {
             margin: 2rem 3rem;
             display: flex;
@@ -24,7 +40,7 @@ export const buildPageHTML = (
             background-color: #fff;
             font-family: 'UthmaniHafs';
             flex: 1;
-          }
+                      }
           .line {
             display: flex;
             flex-direction: row-reverse;
@@ -55,7 +71,7 @@ export const buildPageHTML = (
             }
         </style>
       </head>
-      <body>
+      <body class="fadeIn">
         ${data?.lines
           ?.map(l => {
             const lineId = `line-${l.line.line_id}`;
