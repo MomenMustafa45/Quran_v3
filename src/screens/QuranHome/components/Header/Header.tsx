@@ -61,13 +61,13 @@ const Header = ({ suras, juzs, showModal }: HeaderProps) => {
           iconName="note-text-outline"
           iconType="MaterialCommunityIcons"
           title={sura.result?.name_arabic}
-          onPress={() => {}}
+          onPress={() => showModal(QuranModalTypes.Suras)}
         />
         <AppButton
           iconName="layers-outline"
           iconType="Ionicons"
           title={juz?.juz_number.toString()}
-          onPress={() => {}}
+          onPress={() => showModal(QuranModalTypes.Juz)}
         />
         <AppButton
           iconName="sound"
@@ -79,7 +79,7 @@ const Header = ({ suras, juzs, showModal }: HeaderProps) => {
           iconName="search"
           iconType="MaterialIcons"
           title={'البحث'}
-          onPress={() => {}}
+          onPress={() => showModal(QuranModalTypes.Search)}
         />
         <AppButton
           iconName="setting"

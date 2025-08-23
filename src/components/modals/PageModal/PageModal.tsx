@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  TextInput,
-} from 'react-native';
+import { FlatList, View } from 'react-native';
 import AppModal from '../../AppModal/AppModal';
 import { QuranModalTypes } from '../../../screens/QuranHome/hooks/useQuranModals';
 import { getPages } from '../../../database/getPages';
 import { QuranMenuPageType } from '../../../database/types/quranPageData';
+import { styles } from './styles';
+import QuranMenuItem from '../../ModalMainItem/ModalMainItem';
+import AppInput from '../../AppInput/AppInput';
 
 type PageModalProps = {
   visible: boolean;
@@ -35,7 +32,9 @@ const PageModal = ({ visible, onClose, onSelectPage }: PageModalProps) => {
     if (!query.trim()) return pagesMeta;
     const pageNum = Number(query);
     if (isNaN(pageNum)) return [];
-    return pagesMeta.filter(item => item.page_number === pageNum);
+    return pagesMeta.filter(item =>
+      item.page_number.toString().includes(query),
+    );
   };
 
   const onClickPageHandler = ({ item }: { item: QuranMenuPageType }) => {
@@ -46,31 +45,44 @@ const PageModal = ({ visible, onClose, onSelectPage }: PageModalProps) => {
   };
 
   const renderItem = ({ item }: { item: QuranMenuPageType }) => (
-    <TouchableOpacity
-      style={styles.item}
-      onPress={() => onClickPageHandler({ item })}
-    >
-      <Text style={styles.pageText}>صفحة {item.page_number}</Text>
-      <Text style={styles.surahText}>سورة: {item.surah_name}</Text>
-      <Text style={styles.juzText}>جزء {item.juz_id}</Text>
-    </TouchableOpacity>
+    <QuranMenuItem onPress={() => onClickPageHandler({ item })}>
+      <QuranMenuItem.Page>{item.page_number}</QuranMenuItem.Page>
+      <QuranMenuItem.Surah>{item.surah_name}</QuranMenuItem.Surah>
+      <QuranMenuItem.Juz>{item.juz_id}</QuranMenuItem.Juz>
+    </QuranMenuItem>
+  );
+
+  const renderListHeader = () => (
+    <QuranMenuItem.Header>
+      <QuranMenuItem.HeaderText>رقم الصفحة</QuranMenuItem.HeaderText>
+      <QuranMenuItem.HeaderText>اسم السورة</QuranMenuItem.HeaderText>
+      <QuranMenuItem.HeaderText>رقم الجزء</QuranMenuItem.HeaderText>
+    </QuranMenuItem.Header>
   );
 
   return (
     <AppModal
       visible={visible}
       onClose={() => onClose(QuranModalTypes.Page)}
-      title="الصفحات"
+      title="صفحات القران الكريم"
     >
       {/* 🔍 Input */}
-      <TextInput
+      <AppInput
         value={query}
         onChangeText={setQuery}
         keyboardType="numeric"
         placeholder="ادخل رقم الصفحة..."
-        style={styles.searchInput}
-      />
+        onSubmitEditing={() => {
+          const pageNumber = Number(query);
 
+          if (pageNumber >= 1 && pageNumber <= 604) {
+            onSelectPage(pageNumber);
+            onClose(QuranModalTypes.Page);
+            setQuery('');
+          }
+        }}
+      />
+      <View>{renderListHeader()}</View>
       <FlatList
         data={filteredData()}
         keyExtractor={item => item.page_id.toString()}
@@ -78,31 +90,10 @@ const PageModal = ({ visible, onClose, onSelectPage }: PageModalProps) => {
         initialNumToRender={20}
         maxToRenderPerBatch={20}
         windowSize={10}
+        contentContainerStyle={styles.listContainer}
       />
     </AppModal>
   );
 };
 
 export default PageModal;
-
-const styles = StyleSheet.create({
-  searchInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    fontSize: 16,
-  },
-  item: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#ccc',
-  },
-  pageText: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-  surahText: { fontSize: 14, color: '#444', marginTop: 2 },
-  juzText: { fontSize: 13, color: '#666', marginTop: 2 },
-});

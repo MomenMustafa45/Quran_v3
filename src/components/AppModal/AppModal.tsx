@@ -4,36 +4,30 @@ import {
   View,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  TextInput,
+  ViewStyle,
+  StyleProp,
 } from 'react-native';
 import { styles } from './styles';
 import AppText from '../AppText/AppText';
 import AppIcon from '../AppIcon/AppIcon';
 import { iconSizes } from '../../constants/desingSystem';
+import { COLORS } from '../../constants/colors';
 
-type AppModalProps<T> = {
+type AppModalProps = {
   visible: boolean;
   title: string;
-  data?: T[];
   onClose: () => void;
-  withSearch?: boolean;
   children?: ReactNode;
-  onTextChange?: (text: string) => void;
-  searchValue?: string;
-  searchPlaceholder?: string;
+  modalParentCustomStyles?: StyleProp<ViewStyle>;
 };
 
-export default function AppModal<T>({
+export default function AppModal({
   visible,
   title,
-  data,
   onClose,
-  withSearch = false,
   children,
-  onTextChange,
-  searchValue,
-  searchPlaceholder,
-}: AppModalProps<T>) {
+  modalParentCustomStyles,
+}: AppModalProps) {
   return (
     <Modal
       visible={visible}
@@ -54,21 +48,16 @@ export default function AppModal<T>({
                     name="close"
                     type="Ionicons"
                     size={iconSizes['2xl']}
+                    color={COLORS.lightCream}
                   />
                 </TouchableOpacity>
               </View>
 
-              {/* Search */}
-              {withSearch && data && (
-                <TextInput
-                  style={styles.search}
-                  placeholder={searchPlaceholder || 'ابحث...'}
-                  value={searchValue}
-                  onChangeText={onTextChange}
-                />
-              )}
-
-              <View style={styles.modalContentContainer}>{children}</View>
+              <View
+                style={[styles.modalContentContainer, modalParentCustomStyles]}
+              >
+                {children}
+              </View>
             </View>
           </TouchableWithoutFeedback>
         </View>

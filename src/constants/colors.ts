@@ -5,4 +5,5 @@ export const COLORS = {
   deepGold: '#B3883B',
   calligraphyBlack: '#2D2B29',
   mutedOlive: '#8B8A67',
+  white: '#fff',
 };

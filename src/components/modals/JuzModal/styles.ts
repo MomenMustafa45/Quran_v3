@@ -3,7 +3,7 @@ import { paddings } from '../../../constants/desingSystem';
 
 export const styles = StyleSheet.create({
   listContainer: {
-    paddingVertical: paddings.sm,
+    paddingVertical: paddings.md,
     paddingHorizontal: paddings.md,
   },
 });

@@ -5,7 +5,13 @@
  * @format
  */
 
-import { StatusBar, StyleSheet, useColorScheme } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  useColorScheme,
+} from 'react-native';
 import AppContainer from './src/navigation';
 import Toast from 'react-native-toast-message';
 import { Provider } from 'react-redux';
@@ -18,11 +24,17 @@ function App() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-        <Provider store={store}>
-          <AppContainer />
-        </Provider>
-        <Toast />
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          // keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 40}
+        >
+          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+          <Provider store={store}>
+            <AppContainer />
+          </Provider>
+          <Toast />
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </SafeAreaProvider>
   );

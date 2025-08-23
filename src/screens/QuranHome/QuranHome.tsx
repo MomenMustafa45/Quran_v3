@@ -16,13 +16,15 @@ import { useAppDispatch } from '../../store/hooks/storeHooks';
 import { setCurrentPage } from '../../store/slices/pageSlice';
 import PageModal from '../../components/modals/PageModal/PageModal';
 import useQuranModals from './hooks/useQuranModals';
+import SurasModal from '../../components/modals/SurasModal/SurasModal';
+import JuzModal from '../../components/modals/JuzModal/JuzModal';
+import SearchModal from '../../components/modals/SearchModal/SearchModal';
 
 const { width } = Dimensions.get('window');
 const isRtl = I18nManager.isRTL;
 
 const QuranHome = () => {
   const loadedFontRef = useRef<string>('');
-
   const [suras, setSuras] = useState<QuranSuraType[]>([]);
   const [juzs, setJuzs] = useState<QuranJuzType[]>([]);
   const [initialPage, setInitialPage] = useState<number | null>(null);
@@ -36,7 +38,7 @@ const QuranHome = () => {
     hideModal,
     juzModal,
     searchModal,
-    settingsModal,
+    // settingsModal,
     showModal,
     surasModal,
   } = useQuranModals();
@@ -71,7 +73,7 @@ const QuranHome = () => {
       <View style={styles.pageItem}>
         <QuranPage
           pageId={item}
-          loadedFont={loadedFontRef.current} // 🔥 stable forever
+          loadedFont={loadedFontRef.current}
           playSound={playSound}
         />
       </View>
@@ -110,8 +112,25 @@ const QuranHome = () => {
         visible={pageModal}
         onClose={hideModal}
         onSelectPage={scrollToIndex}
-        juzs={juzs}
+      />
+
+      <SurasModal
+        onClose={hideModal}
+        onSelectPage={scrollToIndex}
         suras={suras}
+        visible={surasModal}
+      />
+      <JuzModal
+        onClose={hideModal}
+        onSelectPage={scrollToIndex}
+        juzs={juzs}
+        visible={juzModal}
+      />
+
+      <SearchModal
+        onClose={hideModal}
+        onSelectPage={scrollToIndex}
+        visible={searchModal}
       />
     </View>
   );

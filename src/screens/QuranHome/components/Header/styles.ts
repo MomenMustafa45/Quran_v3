@@ -1,10 +1,14 @@
 import { I18nManager, StyleSheet } from 'react-native';
 import { COLORS } from '../../../../constants/colors';
-import { margins, paddings } from '../../../../constants/desingSystem';
+import {
+  flexDirectionRow,
+  margins,
+  paddings,
+} from '../../../../constants/desingSystem';
 
 export const styles = StyleSheet.create({
   headerContainer: {
-    flexDirection: I18nManager.isRTL ? 'row' : 'row-reverse',
+    flexDirection: flexDirectionRow,
     backgroundColor: COLORS.backgroundBeige,
     padding: paddings.sm,
   },
@@ -18,11 +22,11 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   pageInfoContainer: {
-    flexDirection: I18nManager.isRTL ? 'row' : 'row-reverse',
+    flexDirection: flexDirectionRow,
     columnGap: 4,
   },
   btnsContainer: {
-    flexDirection: I18nManager.isRTL ? 'row' : 'row-reverse',
+    flexDirection: flexDirectionRow,
     columnGap: margins.sm,
     flex: 1,
   },

@@ -1,7 +1,8 @@
-import { Dimensions } from 'react-native';
+import { Dimensions, I18nManager } from 'react-native';
 
 export const widthRatio = Dimensions.get('window').width / 360;
 export const heightRatio = Dimensions.get('window').height / 800;
+const isRTL = I18nManager.isRTL;
 
 // Border widths
 export const borders = {
@@ -21,6 +22,8 @@ export const radius = {
   xxl: widthRatio * 24,
   full: widthRatio * 9999,
 };
+
+export const flexDirectionRow = isRTL ? 'row' : 'row-reverse';
 
 // Fonts
 export const fonts = {

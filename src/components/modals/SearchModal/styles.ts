@@ -6,4 +6,9 @@ export const styles = StyleSheet.create({
     paddingVertical: paddings.sm,
     paddingHorizontal: paddings.md,
   },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

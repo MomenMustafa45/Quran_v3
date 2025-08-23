@@ -1,6 +1,12 @@
-import { I18nManager, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { COLORS } from '../../constants/colors';
-import { fontSizes, paddings, radius } from '../../constants/desingSystem';
+import {
+  flexDirectionRow,
+  fontSizes,
+  margins,
+  paddings,
+  radius,
+} from '../../constants/desingSystem';
 
 export const styles = StyleSheet.create({
   backdrop: {
@@ -16,30 +22,18 @@ export const styles = StyleSheet.create({
     width: '80%',
   },
   header: {
-    flexDirection: I18nManager.isRTL ? 'row' : 'row-reverse',
+    flexDirection: flexDirectionRow,
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: paddings.lg,
+    marginBottom: margins.lg,
+    padding: paddings.md,
   },
   title: {
     fontSize: fontSizes.xl,
     fontWeight: '800',
+    color: COLORS.lightCream,
   },
-  search: {
-    margin: 12,
-    padding: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
-  },
-  item: {
-    padding: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: '#eee',
-  },
-  itemText: {
-    fontSize: 16,
-  },
+
   modalContentContainer: {
     flex: 1,
   },
