@@ -17,16 +17,13 @@ export const buildPageHTML = (
             src: url(data:font/truetype;base64,${loadedFont}) format('truetype');
           }
           body {
-            margin: 0;
-            padding: 10px;
+            margin: 2rem 3rem;
             display: flex;
             flex-direction: column;
             justify-content: ${centerPage};
             background-color: #fff;
-            padding: 3vh 6vw;
             font-family: 'UthmaniHafs';
             flex: 1;
-            padding-bottom: 0;
           }
           .line {
             display: flex;
@@ -43,7 +40,7 @@ export const buildPageHTML = (
             justify-content: space-between;
           }
           .word {
-            font-size: 4.7vw;
+            font-size: clamp(4vw, 4.6vw, 5vw);
             white-space: nowrap;
             font-weight:bold;
           }

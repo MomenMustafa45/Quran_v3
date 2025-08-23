@@ -59,6 +59,10 @@ const useQuranPageActions = ({
   const handleWordClick = useCallback(
     async (audioUrl: string, wordId: string, ayaId: number) => {
       if (!audioUrl) return;
+      if (isDownloadingRef.current) {
+        Toast.show({ text1: 'جاري تحميل الصوتيات', type: 'info' });
+        return;
+      }
 
       const isAyahType = soundType === 'ayah';
 
