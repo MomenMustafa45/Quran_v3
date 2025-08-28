@@ -9,7 +9,7 @@ export const downloadPageAudios = async (
   try {
     const db = await openDB();
 
-    // Fetch all URLs
+    // Fetch all unique URLs from Ayats + Words
     const [result] = await db.executeSql(
       `
         SELECT audio_url FROM Ayats WHERE page_id = ?
@@ -19,58 +19,78 @@ export const downloadPageAudios = async (
       [pageId, pageId],
     );
 
-    const urls: string[] = [];
+    const urlsSet = new Set<string>();
     for (let i = 0; i < result.rows.length; i++) {
-      urls.push(result.rows.item(i).audio_url);
+      const url = result.rows.item(i).audio_url;
+      if (url) urlsSet.add(url);
     }
 
-    // Remove duplicates + empty
-    const allUrls = urls.filter(Boolean);
-    const totalFiles = allUrls.length;
+    const urls = Array.from(urlsSet);
+    const totalFiles = urls.length;
     let finishedFiles = 0;
 
-    const concurrencyLimit = 5;
+    const concurrencyLimit = 2; // lower to reduce server throttling
     let activeDownloads: Promise<void>[] = [];
 
-    const startDownload = async (url: string) => {
-      try {
-        const fileName = url.split('/').pop();
-        const dest = RNFS.DocumentDirectoryPath + '/' + fileName;
+    // Retry logic for downloads
+    const downloadWithRetry = async (
+      url: string,
+      retries = 3,
+    ): Promise<void> => {
+      let attempt = 0;
+      while (attempt < retries) {
+        try {
+          const fileName = url.split('/').pop();
+          const dest = RNFS.DocumentDirectoryPath + '/' + fileName;
 
-        const exists = await RNFS.exists(dest);
-        if (exists) {
+          // Skip if already downloaded
+          const exists = await RNFS.exists(dest);
+          if (exists) {
+            finishedFiles++;
+            onProgress?.((finishedFiles / totalFiles) * 100);
+            return;
+          }
+
+          // Attempt download
+          await RNFS.downloadFile({
+            fromUrl: url,
+            toFile: dest,
+            progressDivider: 5,
+          }).promise;
+
           finishedFiles++;
           onProgress?.((finishedFiles / totalFiles) * 100);
           return;
+        } catch (err) {
+          console.log('retrying', attempt, url);
+
+          attempt++;
+          if (attempt >= retries) {
+            const errorMessage =
+              (err instanceof Error && err.message) ||
+              'Something went wrong while downloading audio.';
+            Toast.show({
+              type: 'error',
+              text1: 'Download failed',
+              text2: errorMessage,
+            });
+            console.error('Download error', url, err);
+            onProgress?.(0);
+            return;
+          }
+          // Wait before retrying (exponential backoff: 1s, 2s, 4s…)
+          await new Promise(res =>
+            setTimeout(res, 1000 * Math.pow(2, attempt)),
+          );
         }
-
-        await RNFS.downloadFile({
-          fromUrl: url,
-          toFile: dest,
-          progress: () => {},
-          progressDivider: 5, // Update every 5%
-        }).promise;
-
-        finishedFiles++;
-        onProgress?.((finishedFiles / totalFiles) * 100);
-      } catch (err) {
-        const errorMessage =
-          (err instanceof Error && err.message) ||
-          'Something went wrong while downloading this page audio.';
-        Toast.show({
-          type: 'error',
-          text1: 'Download failed',
-          text2: errorMessage,
-        });
-        console.error('Download error', url, err);
-        onProgress?.(0);
       }
     };
 
-    for (const url of allUrls) {
+    // Controlled concurrency loop
+    for (const url of urls) {
       if (!url) continue;
 
-      const downloadPromise = startDownload(url);
+      const downloadPromise = downloadWithRetry(url);
       activeDownloads.push(downloadPromise);
 
       if (activeDownloads.length >= concurrencyLimit) {
