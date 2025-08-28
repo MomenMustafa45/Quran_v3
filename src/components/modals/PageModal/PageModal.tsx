@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FlatList, View } from 'react-native';
+import { FlatList } from 'react-native';
 import AppModal from '../../AppModal/AppModal';
 import { QuranModalTypes } from '../../../screens/QuranHome/hooks/useQuranModals';
 import { getPages } from '../../../database/getPages';
