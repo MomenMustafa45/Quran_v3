@@ -58,7 +58,8 @@ const useQuranPageActions = ({
   /** Play audio when a word is clicked */
   const handleWordClick = useCallback(
     async (audioUrl: string, wordId: string, ayaId: number) => {
-      if (!audioUrl) return;
+      if (!audioUrl || audioUrl === 'null') return;
+
       if (isDownloadingRef.current) {
         Toast.show({ text1: 'جاري تحميل الصوتيات', type: 'info' });
         return;

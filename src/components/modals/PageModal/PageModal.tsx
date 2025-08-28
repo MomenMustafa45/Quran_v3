@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import AppModal from '../../AppModal/AppModal';
 import { QuranModalTypes } from '../../../screens/QuranHome/hooks/useQuranModals';
@@ -21,43 +21,41 @@ const PageModal = ({ visible, onClose, onSelectPage }: PageModalProps) => {
   useEffect(() => {
     const loadData = async () => {
       const getPagesData = await getPages();
-
       setPagesMeta(getPagesData);
     };
-
     loadData();
   }, []);
 
-  const filteredData = () => {
+  // ✅ Memoized filtering (only recalculates when query/pagesMeta changes)
+  const filteredData = useMemo(() => {
     if (!query.trim()) return pagesMeta;
     const pageNum = Number(query);
     if (isNaN(pageNum)) return [];
     return pagesMeta.filter(item =>
       item.page_number.toString().includes(query),
     );
-  };
+  }, [query, pagesMeta]);
 
-  const onClickPageHandler = ({ item }: { item: QuranMenuPageType }) => {
-    const selectItem = item.page_number;
-    onSelectPage(selectItem);
-    onClose(QuranModalTypes.Page);
-    setQuery('');
-  };
-
-  const renderItem = ({ item }: { item: QuranMenuPageType }) => (
-    <QuranMenuItem onPress={() => onClickPageHandler({ item })}>
-      <QuranMenuItem.Page>{item.page_number}</QuranMenuItem.Page>
-      <QuranMenuItem.Surah>{item.surah_name}</QuranMenuItem.Surah>
-      <QuranMenuItem.Juz>{item.juz_id}</QuranMenuItem.Juz>
-    </QuranMenuItem>
+  // ✅ Handles selecting a page
+  const onClickPageHandler = useCallback(
+    (item: QuranMenuPageType) => {
+      onSelectPage(item.page_number);
+      onClose(QuranModalTypes.Page);
+      setQuery('');
+    },
+    [onClose, onSelectPage],
   );
 
-  const renderListHeader = () => (
-    <QuranMenuItem.Header>
-      <QuranMenuItem.HeaderText>رقم الصفحة</QuranMenuItem.HeaderText>
-      <QuranMenuItem.HeaderText>اسم السورة</QuranMenuItem.HeaderText>
-      <QuranMenuItem.HeaderText>رقم الجزء</QuranMenuItem.HeaderText>
-    </QuranMenuItem.Header>
+  // ✅ List item renderer
+  const renderItem = useCallback(
+    ({ item }: { item: QuranMenuPageType }) => (
+      <QuranMenuItem onPress={() => onClickPageHandler(item)}>
+        <QuranMenuItem.Page>{item.page_number}</QuranMenuItem.Page>
+        <QuranMenuItem.Surah>{item.surah_name}</QuranMenuItem.Surah>
+        <QuranMenuItem.Juz>{item.juz_id}</QuranMenuItem.Juz>
+      </QuranMenuItem>
+    ),
+    [onClickPageHandler],
   );
 
   return (
@@ -74,7 +72,6 @@ const PageModal = ({ visible, onClose, onSelectPage }: PageModalProps) => {
         placeholder="ادخل رقم الصفحة..."
         onSubmitEditing={() => {
           const pageNumber = Number(query);
-
           if (pageNumber >= 1 && pageNumber <= 604) {
             onSelectPage(pageNumber);
             onClose(QuranModalTypes.Page);
@@ -82,9 +79,14 @@ const PageModal = ({ visible, onClose, onSelectPage }: PageModalProps) => {
           }
         }}
       />
-      <View>{renderListHeader()}</View>
+
+      <QuranMenuItem.Header>
+        <QuranMenuItem.HeaderText>رقم الصفحة</QuranMenuItem.HeaderText>
+        <QuranMenuItem.HeaderText>اسم السورة</QuranMenuItem.HeaderText>
+        <QuranMenuItem.HeaderText>رقم الجزء</QuranMenuItem.HeaderText>
+      </QuranMenuItem.Header>
       <FlatList
-        data={filteredData()}
+        data={filteredData}
         keyExtractor={item => item.page_id.toString()}
         renderItem={renderItem}
         initialNumToRender={20}

@@ -17,8 +17,8 @@ export const searchAyats = async (query: string) => {
 
   // fetch a batch first (to avoid scanning all rows)
   const [results] = await db.executeSql(
-    `SELECT * FROM Ayats WHERE text_uthmani = ?`,
-    [query],
+    `SELECT * FROM Ayats WHERE text_arabic LIKE ?`,
+    [`%${query}%`],
   );
 
   const ayats: QuranAyahType[] = mapRowsToArray<QuranAyahType>(results.rows);
