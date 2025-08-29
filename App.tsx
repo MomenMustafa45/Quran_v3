@@ -1,10 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import {
   KeyboardAvoidingView,
   Platform,
@@ -17,9 +10,25 @@ import Toast from 'react-native-toast-message';
 import { Provider } from 'react-redux';
 import { store } from './src/store/store';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+  useForeground,
+} from 'react-native-google-mobile-ads';
+import { useRef } from 'react';
+
+const adUnitId = __DEV__
+  ? TestIds.ADAPTIVE_BANNER
+  : 'ca-app-pub-5893673534075496/5813472914';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+  const bannerRef = useRef<BannerAd>(null);
+
+  useForeground(() => {
+    Platform.OS === 'ios' && bannerRef.current?.load();
+  });
 
   return (
     <SafeAreaProvider>
@@ -35,6 +44,11 @@ function App() {
           </Provider>
           <Toast />
         </KeyboardAvoidingView>
+        <BannerAd
+          ref={bannerRef}
+          unitId={adUnitId}
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+        />
       </SafeAreaView>
     </SafeAreaProvider>
   );

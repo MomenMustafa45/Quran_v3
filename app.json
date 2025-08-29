@@ -1,4 +1,7 @@
 {
   "name": "forsa_quran",
-  "displayName": "forsa_quran"
+  "displayName": "forsa_quran",
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-5893673534075496~8583106481"
+  }
 }
