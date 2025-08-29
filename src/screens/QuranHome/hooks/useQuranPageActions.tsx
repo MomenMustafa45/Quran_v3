@@ -5,6 +5,9 @@ import { downloadPageAudios } from '../../../database/downloadAudios';
 import WebView from 'react-native-webview';
 import Toast from 'react-native-toast-message';
 import { useAppSelector } from '../../../store/hooks/storeHooks';
+import { getItem } from '../../../../storage';
+import { STORAGE_KEYS } from '../../../constants/storageKeys';
+import { COLORS } from '../../../constants/colors';
 
 type useQuranPageActionsProps = {
   pageId: number;
@@ -31,12 +34,18 @@ const useQuranPageActions = ({
   /** Highlight multiple words (ayah) */
   const toggleHighlightAyaHandler = useCallback(
     (words: { word_id: number }[], highlight = true) => {
+      const highlightedWord = getItem(STORAGE_KEYS.LISTEN_WORD_COLOR);
+      const highlightBGWord = getItem(STORAGE_KEYS.LISTEN_WORD_BG_COLOR);
       const jsCode = words
         .map(
           w =>
             `document.getElementById('${w.word_id}').style.backgroundColor = '${
-              highlight ? 'rgba(255, 255, 0, 0.3)' : ''
-            }';`,
+              highlight ? `${highlightBGWord || COLORS.deepGold}` : ''
+            }';
+            document.getElementById('${w.word_id}').style.color = '${
+              highlight ? `${highlightedWord || ''}` : ''
+            }';
+            `,
         )
         .join('');
       webViewRef.current?.injectJavaScript(jsCode);
@@ -47,9 +56,15 @@ const useQuranPageActions = ({
   /** Highlight single word */
   const toggleHighlightWordHandler = useCallback(
     (wordId: string, highlight = true) => {
+      const highlightedWord = getItem(STORAGE_KEYS.LISTEN_WORD_COLOR);
+      const highlightBGWord = getItem(STORAGE_KEYS.LISTEN_WORD_BG_COLOR);
       const jsCode = `document.getElementById('${wordId}').style.backgroundColor = '${
-        highlight ? 'rgba(255, 255, 0, 0.3)' : ''
-      }';`;
+        highlight ? `${highlightBGWord || COLORS.deepGold}` : ''
+      }';
+      document.getElementById('${wordId}').style.color = '${
+        highlight ? `${highlightedWord || ''}` : ''
+      }';
+      `;
       webViewRef.current?.injectJavaScript(jsCode);
     },
     [],

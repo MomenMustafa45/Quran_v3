@@ -2,14 +2,15 @@
 import React from 'react';
 import {
   TouchableOpacity,
-  Text,
   GestureResponderEvent,
   ViewStyle,
   TextStyle,
+  StyleProp,
 } from 'react-native';
 import { styles } from './styles';
 import { iconSizes } from '../../constants/desingSystem';
 import AppIcon, { iconTypes } from '../AppIcon/AppIcon';
+import AppText from '../AppText/AppText';
 
 type AppButtonProps = {
   title?: string;
@@ -17,7 +18,7 @@ type AppButtonProps = {
   iconType?: keyof typeof iconTypes;
   iconSize?: number;
   onPress?: (event: GestureResponderEvent) => void;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   textStyle?: TextStyle;
   disabled?: boolean;
 };
@@ -51,7 +52,7 @@ const AppButton: React.FC<AppButtonProps> = ({
     >
       {renderIcon()}
       {/* Title */}
-      {title && <Text style={[styles.title, textStyle]}>{title}</Text>}
+      {title && <AppText style={[styles.title, textStyle]}>{title}</AppText>}
     </TouchableOpacity>
   );
 };

@@ -19,6 +19,7 @@ import useQuranModals from './hooks/useQuranModals';
 import SurasModal from '../../components/modals/SurasModal/SurasModal';
 import JuzModal from '../../components/modals/JuzModal/JuzModal';
 import SearchModal from '../../components/modals/SearchModal/SearchModal';
+import SettingsModal from '../../components/modals/SettingsModal/SettingsModal';
 
 const { width } = Dimensions.get('window');
 const isRtl = I18nManager.isRTL;
@@ -38,7 +39,7 @@ const QuranHome = () => {
     hideModal,
     juzModal,
     searchModal,
-    // settingsModal,
+    settingsModal,
     showModal,
     surasModal,
   } = useQuranModals();
@@ -132,6 +133,8 @@ const QuranHome = () => {
         onSelectPage={scrollToIndex}
         visible={searchModal}
       />
+
+      <SettingsModal visible={settingsModal} onClose={hideModal} />
     </View>
   );
 };

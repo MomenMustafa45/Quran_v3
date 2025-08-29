@@ -85,7 +85,7 @@ const Header = ({ suras, juzs, showModal }: HeaderProps) => {
           iconName="setting"
           iconType="AntDesign"
           title={'الاعدادات'}
-          onPress={() => {}}
+          onPress={() => showModal(QuranModalTypes.Settings)}
         />
       </View>
     </View>

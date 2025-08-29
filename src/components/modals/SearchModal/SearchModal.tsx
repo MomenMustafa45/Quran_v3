@@ -54,6 +54,7 @@ const SearchModal = ({ visible, onClose, onSelectPage }: SearchModalProps) => {
       visible={visible}
       onClose={() => onClose(QuranModalTypes.Search)}
       title="البحث"
+      animationType="fade"
     >
       {/* 🔍 Input */}
       <AppInput

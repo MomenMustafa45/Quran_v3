@@ -19,6 +19,8 @@ type AppModalProps = {
   onClose: () => void;
   children?: ReactNode;
   modalParentCustomStyles?: StyleProp<ViewStyle>;
+  animationType?: 'none' | 'slide' | 'fade' | undefined;
+  customModalContentStyles?: StyleProp<ViewStyle>;
 };
 
 export default function AppModal({
@@ -27,19 +29,21 @@ export default function AppModal({
   onClose,
   children,
   modalParentCustomStyles,
+  animationType = 'slide',
+  customModalContentStyles,
 }: AppModalProps) {
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
+      animationType={animationType}
       onRequestClose={onClose}
     >
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.backdrop}>
           {/* Prevent closing when tapping inside modal */}
           <TouchableWithoutFeedback>
-            <View style={styles.modalContent}>
+            <View style={[styles.modalContent, customModalContentStyles]}>
               {/* Header */}
               <View style={styles.header}>
                 <AppText style={styles.title}>{title}</AppText>
