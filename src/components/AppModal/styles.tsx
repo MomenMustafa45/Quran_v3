@@ -18,8 +18,8 @@ export const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: COLORS.mutedOlive,
     borderRadius: radius.md,
-    height: '80%',
-    width: '80%',
+    width: '90%',
+    height: '70%',
   },
   header: {
     flexDirection: flexDirectionRow,

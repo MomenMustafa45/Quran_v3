@@ -7,6 +7,7 @@ import { QuranMenuPageType } from '../../../database/types/quranPageData';
 import { styles } from './styles';
 import QuranMenuItem from '../../ModalMainItem/ModalMainItem';
 import AppInput from '../../AppInput/AppInput';
+import PageItem from './components/PageItem/PageItem';
 
 type PageModalProps = {
   visible: boolean;
@@ -48,13 +49,9 @@ const PageModal = ({ visible, onClose, onSelectPage }: PageModalProps) => {
 
   // ✅ List item renderer
   const renderItem = useCallback(
-    ({ item }: { item: QuranMenuPageType }) => (
-      <QuranMenuItem onPress={() => onClickPageHandler(item)}>
-        <QuranMenuItem.Page>{item.page_number}</QuranMenuItem.Page>
-        <QuranMenuItem.Surah>{item.surah_name}</QuranMenuItem.Surah>
-        <QuranMenuItem.Juz>{item.juz_id}</QuranMenuItem.Juz>
-      </QuranMenuItem>
-    ),
+    ({ item }: { item: QuranMenuPageType }) => {
+      return <PageItem item={item} onClickPageHandler={onClickPageHandler} />;
+    },
     [onClickPageHandler],
   );
 

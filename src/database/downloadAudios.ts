@@ -1,6 +1,8 @@
 import RNFS from 'react-native-fs';
 import { openDB } from './connection';
 import Toast from 'react-native-toast-message';
+import { getItem, setItem } from '../../storage';
+import { STORAGE_KEYS } from '../constants/storageKeys';
 
 export const downloadPageAudios = async (
   pageId: number,
@@ -102,6 +104,23 @@ export const downloadPageAudios = async (
     }
 
     await Promise.all(activeDownloads);
+
+    // save downloaded pages in storage
+    const storedDownloadedPages = getItem(
+      STORAGE_KEYS.DOWNLOADED_PAGES,
+    ) as string;
+    let downloadedPagesParsed: Record<number, true> = {};
+
+    if (storedDownloadedPages) {
+      downloadedPagesParsed = JSON.parse(storedDownloadedPages);
+    }
+
+    downloadedPagesParsed[pageId] = true;
+
+    setItem(
+      STORAGE_KEYS.DOWNLOADED_PAGES,
+      JSON.stringify(downloadedPagesParsed),
+    );
     console.log('✅ All files downloaded for page', pageId);
   } catch (err) {
     console.error('❌ Download error:', err);

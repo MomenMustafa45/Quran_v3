@@ -57,6 +57,7 @@ const SurasModal = ({
       visible={visible}
       onClose={() => onClose(QuranModalTypes.Suras)}
       title="سور القران الكريم"
+      customModalContentStyles={styles.modalParent}
     >
       {/* 🔍 Input */}
       <AppInput
