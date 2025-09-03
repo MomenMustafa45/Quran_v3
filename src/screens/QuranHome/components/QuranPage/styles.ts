@@ -6,8 +6,6 @@ const { width } = Dimensions.get('window');
 export const styles = StyleSheet.create({
   pageParent: {
     flex: 1,
-    width: '95%',
-    marginHorizontal: 'auto',
   },
   webview: {
     flex: 1,
