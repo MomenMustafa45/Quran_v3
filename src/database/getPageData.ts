@@ -19,7 +19,7 @@ export async function getPageData(pageId: number) {
   // Get surah name from first line
   const surahId = lineResults.rows.item(0).sura_id;
   const [suraResults] = await db.executeSql(
-    `SELECT name_arabic FROM Suras WHERE sura_id = ?;`,
+    `SELECT name_arabic FROM suras WHERE sura_id = ?;`,
     [surahId],
   );
   const surahName: string = suraResults.rows.item(0)?.name_arabic || '';

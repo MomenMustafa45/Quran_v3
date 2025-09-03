@@ -56,7 +56,7 @@ export const buildPageHTML = (
             justify-content: space-between;
           }
           .word {
-            font-size: 5.0vw;
+            font-size: calc(5vw * 0.95);
             white-space: nowrap;
             font-weight:bold;
           }

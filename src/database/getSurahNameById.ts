@@ -5,7 +5,7 @@ export async function getSurahNameById(
 ): Promise<string | null> {
   const db = await openDB();
   const [results] = await db.executeSql(
-    'SELECT name_arabic FROM Suras WHERE sura_id = ? LIMIT 1',
+    'SELECT name_arabic FROM suras WHERE sura_id = ? LIMIT 1',
     [surahId],
   );
 

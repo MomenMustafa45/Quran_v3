@@ -5,7 +5,7 @@ import { QuranSuraType } from './types/quranSuras';
 export const getSuras = async () => {
   const db = await openDB();
 
-  const [results] = await db.executeSql(`SELECT * FROM Suras`);
+  const [results] = await db.executeSql(`SELECT * FROM suras`);
 
   const suras = mapRowsToArray<QuranSuraType>(results.rows);
 
