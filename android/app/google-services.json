@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "483641428490",
+    "project_id": "qurany-37762",
+    "storage_bucket": "qurany-37762.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:483641428490:android:8b3beeefee1114c4b86df3",
+        "android_client_info": {
+          "package_name": "com.forsa_quran"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdczknYEpl8VFttbt2UQUz7xev7R8C01U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
