@@ -31,8 +31,13 @@ const QuranHome = () => {
   const [initialPage, setInitialPage] = useState<number | null>(null);
   const dispatch = useAppDispatch();
 
-  const { flatListRef, playSound, getCurrentPageIndex, scrollToIndex } =
-    useQuranHomeActions();
+  const {
+    flatListRef,
+    playSound,
+    getCurrentPageIndex,
+    scrollToIndex,
+    stopCurrentSound,
+  } = useQuranHomeActions();
 
   const {
     pageModal,
@@ -76,10 +81,11 @@ const QuranHome = () => {
           pageId={item}
           loadedFont={loadedFontRef.current}
           playSound={playSound}
+          stopCurrentSound={stopCurrentSound}
         />
       </View>
     ),
-    [playSound],
+    [playSound, stopCurrentSound],
   );
 
   return (

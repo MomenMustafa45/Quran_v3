@@ -15,6 +15,14 @@ import { STORAGE_KEYS } from '../../../../constants/storageKeys';
 import { setSoundType, SoundType } from '../../../../store/slices/pageSlice';
 import { QuranModalTypes } from '../../hooks/useQuranModals';
 
+const soundTypes: Array<'word' | 'ayah' | 'page'> = ['word', 'ayah', 'page'];
+
+const soundTypeWord = {
+  page: 'صفحة',
+  word: 'كلمة',
+  ayah: 'ايه',
+};
+
 type HeaderProps = {
   suras: QuranSuraType[];
   juzs: QuranJuzType[];
@@ -30,7 +38,10 @@ const Header = ({ suras, juzs, showModal }: HeaderProps) => {
   const juz = getJuzByPage(juzs, currentPage);
 
   const switchSoundTypeHandler = () => {
-    const switchedSoundType = soundType === 'word' ? 'ayah' : 'word';
+    const currentIndex = soundTypes.indexOf(soundType);
+    const nextIndex = (currentIndex + 1) % soundTypes.length;
+    const switchedSoundType = soundTypes[nextIndex];
+
     setItem(STORAGE_KEYS.SOUND_TYPE, switchedSoundType);
     dispatch(setSoundType(switchedSoundType));
   };
@@ -72,7 +83,7 @@ const Header = ({ suras, juzs, showModal }: HeaderProps) => {
         <AppButton
           iconName="sound"
           iconType="AntDesign"
-          title={soundType === 'word' ? 'كلمة' : 'ايه'}
+          title={soundTypeWord[soundType]}
           onPress={switchSoundTypeHandler}
         />
         <AppButton

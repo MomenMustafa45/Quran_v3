@@ -19,15 +19,22 @@ type QuranPageProps = {
     onFinished?: () => void,
     onStop?: () => void,
   ) => void;
+  stopCurrentSound: () => void;
 };
 
-const QuranPage = ({ pageId, loadedFont, playSound }: QuranPageProps) => {
+const QuranPage = ({
+  pageId,
+  loadedFont,
+  playSound,
+  stopCurrentSound,
+}: QuranPageProps) => {
   const [htmlContent, setHtmlContent] = useState<string>('');
   const [isLoadingContent, setIsLoadingContent] = useState(true);
   const { webViewRef, handleWordClick, downloadProgress } = useQuranPageActions(
     {
       pageId,
       playSound,
+      stopCurrentSound,
     },
   );
 

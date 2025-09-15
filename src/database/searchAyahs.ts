@@ -3,6 +3,7 @@ import { mapRowsToArray } from './helpers/mapRowsToArray';
 import { QuranAyahType } from './types/quranAyah';
 
 export type AyahType = {
+  audio_url: string;
   ayat_id: number;
   sura_id: number;
   ayat_number: number;

@@ -5,9 +5,8 @@ import { downloadPageAudios } from '../../../database/downloadAudios';
 import WebView from 'react-native-webview';
 import Toast from 'react-native-toast-message';
 import { useAppSelector } from '../../../store/hooks/storeHooks';
-import { getItem } from '../../../../storage';
-import { STORAGE_KEYS } from '../../../constants/storageKeys';
 import { COLORS } from '../../../constants/colors';
+import { getAyahsByPageId } from '../../../database/getAyahsByPageId';
 
 type useQuranPageActionsProps = {
   pageId: number;
@@ -16,14 +15,17 @@ type useQuranPageActionsProps = {
     onFinished?: () => void,
     onStop?: () => void,
   ) => void;
+  stopCurrentSound: () => void;
 };
 
 const useQuranPageActions = ({
   pageId,
   playSound,
+  stopCurrentSound,
 }: useQuranPageActionsProps) => {
   const [downloadProgress, setDownloadProgress] = useState<number>(0);
   const soundType = useAppSelector(state => state.page.soundType);
+  const soundTxtColors = useAppSelector(state => state.page.soundColors);
 
   const webViewRef = useRef<WebView>(null);
   const isDownloadingRef = useRef(false);
@@ -34,8 +36,8 @@ const useQuranPageActions = ({
   /** Highlight multiple words (ayah) */
   const toggleHighlightAyaHandler = useCallback(
     (words: { word_id: number }[], highlight = true) => {
-      const highlightedWord = getItem(STORAGE_KEYS.LISTEN_WORD_COLOR);
-      const highlightBGWord = getItem(STORAGE_KEYS.LISTEN_WORD_BG_COLOR);
+      const highlightedWord = soundTxtColors.wordTextColor;
+      const highlightBGWord = soundTxtColors.wordBgColor;
       const jsCode = words
         .map(
           w =>
@@ -50,14 +52,14 @@ const useQuranPageActions = ({
         .join('');
       webViewRef.current?.injectJavaScript(jsCode);
     },
-    [],
+    [soundTxtColors.wordBgColor, soundTxtColors.wordTextColor],
   );
 
   /** Highlight single word */
   const toggleHighlightWordHandler = useCallback(
     (wordId: string, highlight = true) => {
-      const highlightedWord = getItem(STORAGE_KEYS.LISTEN_WORD_COLOR);
-      const highlightBGWord = getItem(STORAGE_KEYS.LISTEN_WORD_BG_COLOR);
+      const highlightedWord = soundTxtColors.wordTextColor;
+      const highlightBGWord = soundTxtColors.wordBgColor;
       const jsCode = `document.getElementById('${wordId}').style.backgroundColor = '${
         highlight ? `${highlightBGWord || COLORS.deepGold}` : ''
       }';
@@ -67,8 +69,63 @@ const useQuranPageActions = ({
       `;
       webViewRef.current?.injectJavaScript(jsCode);
     },
-    [],
+    [soundTxtColors.wordBgColor, soundTxtColors.wordTextColor],
   );
+
+  // page audio
+  const playPageAudio = useCallback(async () => {
+    // TODO: Replace with your function to get all ayah IDs for page
+    const ayahsInPage = await getAyahsByPageId(pageId);
+    console.log('🚀 ~ useQuranPageActions ~ ayahsInPage:', ayahsInPage);
+
+    const playAyaSequentially = async (index: number) => {
+      if (index >= ayahsInPage.length) {
+        currentSoundRef.current = null;
+        return;
+      }
+
+      const aya = ayahsInPage[index];
+
+      // Build local file path for the aya
+      const fileName = aya.audio_url.split('/').pop();
+      const fileAyaName = fileName?.split('_').slice(0, 2).join('');
+
+      const localPath = `${RNFS.DocumentDirectoryPath}/${fileAyaName}`;
+
+      const exists = await RNFS.exists(localPath);
+      if (!exists && !isDownloadingRef.current) {
+        isDownloadingRef.current = true;
+        try {
+          await downloadPageAudios(pageId, p => setDownloadProgress(p));
+        } catch (error) {
+          Toast.show({
+            type: 'error',
+            text1: 'Download failed',
+            text2:
+              error instanceof Error
+                ? error.message
+                : 'Error downloading page audios',
+          });
+        }
+        isDownloadingRef.current = false;
+      }
+
+      // Play sound
+      playSound(
+        localPath,
+        async () => {
+          await playAyaSequentially(index + 1);
+        },
+        () => {
+          currentSoundRef.current = null;
+        },
+      );
+    };
+
+    // start recursive play
+    playAyaSequentially(0);
+    return;
+  }, [pageId, playSound]);
 
   /** Play audio when a word is clicked */
   const handleWordClick = useCallback(
@@ -81,9 +138,15 @@ const useQuranPageActions = ({
       }
 
       const isAyahType = soundType === 'ayah';
+      const isPageType = soundType === 'page';
 
       // Remove previous highlights
       if (currentSoundRef.current) {
+        if (isPageType) {
+          currentSoundRef.current = null;
+          stopCurrentSound();
+          return;
+        }
         if (isAyahType) {
           const prevWords = await getWordsByAyaID(
             currentSoundRef.current.ayaId,
@@ -95,6 +158,11 @@ const useQuranPageActions = ({
       }
 
       currentSoundRef.current = { ayaId, wordId };
+
+      if (isPageType) {
+        await playPageAudio();
+        return;
+      }
 
       // Highlight current selection
       let words: { word_id: number }[] = [];
@@ -108,6 +176,7 @@ const useQuranPageActions = ({
       // Determine local file path
       const fileName = audioUrl.split('/').pop();
       const fileAyaName = fileName?.split('_').slice(0, 2).join('') + '.mp3';
+      console.log('🚀 ~ useQuranPageActions ~ fileAyaName:', fileAyaName);
       const filePath = isAyahType ? fileAyaName : fileName;
       const localPath = `${RNFS.DocumentDirectoryPath}/${filePath}`;
 
@@ -150,8 +219,10 @@ const useQuranPageActions = ({
     },
     [
       pageId,
+      playPageAudio,
       playSound,
       soundType,
+      stopCurrentSound,
       toggleHighlightAyaHandler,
       toggleHighlightWordHandler,
     ],

@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import AppModal from '../../AppModal/AppModal';
 import { QuranModalTypes } from '../../../screens/QuranHome/hooks/useQuranModals';
 import { styles } from './styles';
@@ -7,6 +7,14 @@ import { COLORS } from '../../../constants/colors';
 import AppColorPick, { ColorPickMode } from '../../AppColorPick/AppColorPick';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
 import { getItem } from '../../../../storage';
+import {
+  setSoundColors,
+  SoundColorsType,
+} from '../../../store/slices/pageSlice';
+import {
+  useAppDispatch,
+  useAppSelector,
+} from '../../../store/hooks/storeHooks';
 
 type SettingsModalProps = {
   visible: boolean;
@@ -21,23 +29,39 @@ const colorBtns = [
 ];
 
 const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
-  const [bgTextColorPicked, setBgTextColorPicked] = useState<string>(
-    COLORS.calligraphyBlack,
-  );
-  const [textColorPicked, setTextColorPicked] = useState(
-    COLORS.calligraphyBlack,
-  );
+  const soundColors = useAppSelector(state => state.page.soundColors);
+  const dispatch = useAppDispatch();
+
+  const getStoredColor = useCallback(() => {
+    const storedTextColor = getItem(STORAGE_KEYS.LISTEN_WORD_COLOR);
+    const storedBgTextColor = getItem(STORAGE_KEYS.LISTEN_WORD_BG_COLOR);
+    const soundColorsObj: SoundColorsType = {
+      wordTextColor: soundColors.wordTextColor,
+      wordBgColor: soundColors.wordBgColor,
+    };
+    if (storedTextColor)
+      soundColorsObj.wordTextColor = storedTextColor.toString();
+    if (storedBgTextColor)
+      soundColorsObj.wordBgColor = storedBgTextColor.toString();
+    dispatch(setSoundColors({ ...soundColorsObj }));
+  }, [dispatch, soundColors.wordBgColor, soundColors.wordTextColor]);
 
   useEffect(() => {
-    const getStoredColor = () => {
-      const storedTextColor = getItem(STORAGE_KEYS.LISTEN_WORD_COLOR);
-      const storedBgTextColor = getItem(STORAGE_KEYS.LISTEN_WORD_BG_COLOR);
-      if (storedTextColor) setTextColorPicked(storedTextColor.toString());
-      if (storedBgTextColor) setBgTextColorPicked(storedBgTextColor.toString());
-    };
     getStoredColor();
-  }, []);
+  }, [
+    dispatch,
+    getStoredColor,
+    soundColors.wordBgColor,
+    soundColors.wordTextColor,
+  ]);
 
+  const soundBgTxtHandler = (color: string) => {
+    dispatch(setSoundColors({ ...soundColors, wordBgColor: color }));
+  };
+
+  const soundTxtHandler = (color: string) => {
+    dispatch(setSoundColors({ ...soundColors, wordTextColor: color }));
+  };
   return (
     <AppModal
       visible={visible}
@@ -52,19 +76,19 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
           colorBtns={colorBtns}
           title="لون الكلمة أثناء الإستماع"
           mode={ColorPickMode.TEXT}
-          bgTextColorPicked={bgTextColorPicked}
-          textColorPicked={textColorPicked}
-          setTextColorPicked={setTextColorPicked}
-          setBgTextColorPicked={setBgTextColorPicked}
+          bgTextColorPicked={soundColors.wordBgColor}
+          textColorPicked={soundColors.wordTextColor}
+          setTextColorPicked={soundTxtHandler}
+          setBgTextColorPicked={soundBgTxtHandler}
         />
         <AppColorPick
           colorBtns={colorBtns}
           title="لون خلفية الكلمة أثناء الإستماع"
           mode={ColorPickMode.BG_TEXT}
-          bgTextColorPicked={bgTextColorPicked}
-          textColorPicked={textColorPicked}
-          setTextColorPicked={setTextColorPicked}
-          setBgTextColorPicked={setBgTextColorPicked}
+          bgTextColorPicked={soundColors.wordBgColor}
+          textColorPicked={soundColors.wordTextColor}
+          setTextColorPicked={soundTxtHandler}
+          setBgTextColorPicked={soundBgTxtHandler}
         />
       </View>
     </AppModal>
