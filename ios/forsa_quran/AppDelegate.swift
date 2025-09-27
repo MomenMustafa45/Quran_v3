@@ -32,10 +32,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     return true
   }
-    override func customize(_ rootView: RCTRootView!) {
-    super.customize(rootView)
-    RNBootSplash.initWithStoryboard("BootSplash", rootView: rootView) // ⬅️ initialize the splash screen
-  }
 }
 
 class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
@@ -49,5 +45,11 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 #else
     Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif
+  }
+  
+  // Add the customize method here instead of in AppDelegate
+  override func customize(_ rootView: RCTRootView!) {
+    super.customize(rootView)
+    RNBootSplash.initWithStoryboard("BootSplash", rootView: rootView)
   }
 }
