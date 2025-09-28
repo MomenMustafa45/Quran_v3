@@ -1,5 +1,5 @@
-import { openDB } from './connection';
-import { mapRowsToArray } from './helpers/mapRowsToArray';
+// searchService.ts
+import { executeQuery } from './connection';
 import { QuranAyahType } from './types/quranAyah';
 
 export type AyahType = {
@@ -11,18 +11,13 @@ export type AyahType = {
   page_id: number;
 };
 
-export const searchAyats = async (query: string) => {
+export const searchAyats = async (query: string): Promise<QuranAyahType[]> => {
   if (!query.trim()) return [];
 
-  const db = await openDB();
-
-  // fetch a batch first (to avoid scanning all rows)
-  const [results] = await db.executeSql(
+  const result = await executeQuery(
     `SELECT * FROM Ayats WHERE text_arabic LIKE ?`,
     [`%${query}%`],
   );
 
-  const ayats: QuranAyahType[] = mapRowsToArray<QuranAyahType>(results.rows);
-
-  return ayats;
+  return result.rows;
 };

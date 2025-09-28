@@ -1,16 +1,17 @@
-import { openDB } from './connection';
-import { mapRowsToArray } from './helpers/mapRowsToArray';
+// wordService.ts
+import { executeQuery } from './connection';
 
-export const getWordsByAyaID = async (ayaId: number) => {
+export const getWordsByAyaID = async (
+  ayaId: number,
+): Promise<{ word_id: number }[]> => {
   try {
-    const db = await openDB();
-    const [result] = await db.executeSql(
+    const result = await executeQuery(
       'SELECT word_id FROM Words WHERE ayat_id = ?',
       [ayaId],
     );
-    const words: { word_id: number }[] = mapRowsToArray(result.rows);
-    console.log('🚀 ~ getWordsByAyaID ~ words:', words);
-    return words;
+
+    console.log('🚀 ~ getWordsByAyaID ~ words:', result.rows);
+    return result.rows;
   } catch (error) {
     console.error('Error fetching words by Aya ID:', error);
     return [];

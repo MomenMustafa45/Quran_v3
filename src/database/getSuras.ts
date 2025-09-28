@@ -1,13 +1,8 @@
-import { openDB } from './connection';
-import { mapRowsToArray } from './helpers/mapRowsToArray';
+// suraService.ts
+import { executeQuery } from './connection';
 import { QuranSuraType } from './types/quranSuras';
 
-export const getSuras = async () => {
-  const db = await openDB();
-
-  const [results] = await db.executeSql(`SELECT * FROM suras`);
-
-  const suras = mapRowsToArray<QuranSuraType>(results.rows);
-
-  return suras;
+export const getSuras = async (): Promise<QuranSuraType[]> => {
+  const result = await executeQuery('SELECT * FROM suras');
+  return result.rows;
 };

@@ -43,6 +43,7 @@ const QuranPage = ({
     const loadPage = async () => {
       setIsLoadingContent(true);
       const data: QuranPageData = await getPageData(pageId);
+      console.log('🚀 ~ loadPage ~ data:', data);
       const pageHtml = buildPageHTML(data, pageId, loadedFont);
       setHtmlContent(pageHtml);
       setIsLoadingContent(false);
@@ -50,6 +51,7 @@ const QuranPage = ({
     loadPage();
   }, [pageId, loadedFont]);
 
+  console.log('🚀 ~ QuranPage ~ isLoadingContent:', isLoadingContent);
   if (isLoadingContent) {
     return null;
   }

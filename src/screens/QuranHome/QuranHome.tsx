@@ -27,7 +27,6 @@ const isRtl = I18nManager.isRTL;
 const QuranHome = () => {
   const loadedFontRef = useRef<string>('');
   const [suras, setSuras] = useState<QuranSuraType[]>([]);
-  console.log('🚀 ~ QuranHome ~ suras:', suras);
   const [juzs, setJuzs] = useState<QuranJuzType[]>([]);
   const [initialPage, setInitialPage] = useState<number | null>(null);
   const dispatch = useAppDispatch();
@@ -63,6 +62,7 @@ const QuranHome = () => {
   useEffect(() => {
     const init = async () => {
       const font = await loadFont();
+      console.log('🚀 ~ init ~ font:', font);
       loadedFontRef.current = font;
 
       const [surasData, juzsData] = await Promise.all([getSuras(), getJuzs()]);

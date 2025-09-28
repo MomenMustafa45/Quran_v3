@@ -1,19 +1,19 @@
-import { openDB } from './connection';
-import { mapRowsToArray } from './helpers/mapRowsToArray';
+// ayahService.ts
+import { executeQuery, prepareParameters } from './connection';
 import { AyahType } from './searchAyahs';
 
-export const getAyahsByPageId = async (pageId: number) => {
+export const getAyahsByPageId = async (pageId: number): Promise<AyahType[]> => {
   try {
-    const db = await openDB();
-    const [result] = await db.executeSql(
+    const parameters = prepareParameters([pageId]);
+    const result = await executeQuery(
       'SELECT * FROM Ayats WHERE page_id = ? ORDER BY ayat_id;',
-      [pageId],
+      parameters,
     );
-    const ayahs: AyahType[] = mapRowsToArray(result.rows);
-    console.log('🚀 ~ getWordsByAyaID ~ words:', ayahs);
-    return ayahs;
+
+    console.log('🚀 ~ getAyahsByPageId ~ ayahs:', result.rows);
+    return result.rows;
   } catch (error) {
-    console.error('Error fetching words by Aya ID:', error);
+    console.error('Error fetching ayahs by page ID:', error);
     return [];
   }
 };

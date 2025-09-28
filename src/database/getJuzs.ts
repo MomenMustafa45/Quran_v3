@@ -1,13 +1,8 @@
-import { openDB } from './connection';
-import { mapRowsToArray } from './helpers/mapRowsToArray';
+// juzService.ts
+import { executeQuery } from './connection';
 import { QuranJuzType } from './types/qraunJuz';
 
-export const getJuzs = async () => {
-  const db = await openDB();
-
-  const [results] = await db.executeSql(`SELECT * FROM Juzs`);
-
-  const juzs = mapRowsToArray<QuranJuzType>(results.rows);
-
-  return juzs;
+export const getJuzs = async (): Promise<QuranJuzType[]> => {
+  const result = await executeQuery('SELECT * FROM Juzs');
+  return result.rows;
 };

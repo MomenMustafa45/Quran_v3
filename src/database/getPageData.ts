@@ -1,47 +1,58 @@
-import { openDB } from './connection';
-import { mapRowsToArray } from './helpers/mapRowsToArray';
+// pageDataService.ts
+import { executeQuery, prepareParameters } from './connection';
 import { QuranLineType } from './types/quranLine';
 import { QuranWordType } from './types/quranWord';
 
-export async function getPageData(pageId: number) {
-  const db = await openDB();
+export interface PageDataResult {
+  surah: string;
+  lines: Array<{
+    line: QuranLineType;
+    words: QuranWordType[];
+  }>;
+}
 
+export async function getPageData(pageId: number): Promise<PageDataResult> {
   // Get all lines of the page
-  const [lineResults] = await db.executeSql(
+  console.log('from here hello');
+
+  const parametersPageId = prepareParameters([pageId]);
+
+  const lineResult = await executeQuery(
     `SELECT * FROM Lines WHERE page_id = ? ORDER BY line_number;`,
-    [pageId],
+    parametersPageId,
   );
 
-  if (lineResults.rows.length === 0) {
+  if (lineResult.rows.length === 0) {
     return { surah: '', lines: [] };
   }
 
+  const parametersSuraId = prepareParameters([lineResult.rows[0].sura_id]);
   // Get surah name from first line
-  const surahId = lineResults.rows.item(0).sura_id;
-  const [suraResults] = await db.executeSql(
+  const suraResult = await executeQuery(
     `SELECT name_arabic FROM suras WHERE sura_id = ?;`,
-    [surahId],
+    parametersSuraId,
   );
-  const surahName: string = suraResults.rows.item(0)?.name_arabic || '';
+
+  const surahName: string = suraResult.rows[0]?.name_arabic || '';
 
   // Prepare lines with words
   const lines = [];
-  for (let i = 0; i < lineResults.rows.length; i++) {
-    const line: QuranLineType = lineResults.rows.item(i);
-
+  for (const line of lineResult.rows) {
+    const parametersLineWords = prepareParameters([
+      line.first_word_id,
+      line.last_word_id,
+    ]);
     // Get words for this line
-    const [wordResults] = await db.executeSql(
+    const wordResult = await executeQuery(
       `SELECT * FROM Words
        WHERE word_id BETWEEN ? AND ?
        ORDER BY word_id;`,
-      [line.first_word_id, line.last_word_id],
+      parametersLineWords,
     );
-
-    const words = mapRowsToArray<QuranWordType>(wordResults.rows);
 
     lines.push({
       line: line,
-      words,
+      words: wordResult.rows,
     });
   }
 

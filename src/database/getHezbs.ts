@@ -1,11 +1,8 @@
-import { openDB } from './connection';
-import { mapRowsToArray } from './helpers/mapRowsToArray';
+// hezbService.ts
+import { executeQuery } from './connection';
 import { QuranHezbType } from './types/quranHezb';
 
-export const getHezbs = async () => {
-  const db = await openDB();
-  const [results] = await db.executeSql(`SELECT * FROM Hezbs`);
-
-  const hezbs: QuranHezbType[] = mapRowsToArray(results.rows);
-  return hezbs;
+export const getHezbs = async (): Promise<QuranHezbType[]> => {
+  const result = await executeQuery('SELECT * FROM Hezbs');
+  return result.rows;
 };

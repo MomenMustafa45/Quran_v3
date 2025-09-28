@@ -1,5 +1,6 @@
+// downloadAudioService.ts
 import RNFS from 'react-native-fs';
-import { openDB } from './connection';
+import { executeQuery, prepareParameters } from './connection';
 import Toast from 'react-native-toast-message';
 import { getItem, setItem } from '../../storage';
 import { STORAGE_KEYS } from '../constants/storageKeys';
@@ -9,32 +10,29 @@ export const downloadPageAudios = async (
   onProgress?: (progress: number) => void,
 ) => {
   try {
-    const db = await openDB();
-
+    const urlsParameters = prepareParameters([pageId, pageId]);
     // Fetch all unique URLs from Ayats + Words
-    const [result] = await db.executeSql(
+    const result = await executeQuery(
       `
         SELECT audio_url FROM Ayats WHERE page_id = ?
         UNION
         SELECT audio_url FROM Words WHERE page_number = ?
       `,
-      [pageId, pageId],
+      urlsParameters,
     );
 
     const urlsSet = new Set<string>();
-    for (let i = 0; i < result.rows.length; i++) {
-      const url = result.rows.item(i).audio_url;
-      if (url) urlsSet.add(url);
-    }
+    result.rows.forEach((row: any) => {
+      if (row.audio_url) urlsSet.add(row.audio_url);
+    });
 
     const urls = Array.from(urlsSet);
     const totalFiles = urls.length;
     let finishedFiles = 0;
 
-    const concurrencyLimit = 2; // lower to reduce server throttling
+    const concurrencyLimit = 2;
     let activeDownloads: Promise<void>[] = [];
 
-    // Retry logic for downloads
     const downloadWithRetry = async (
       url: string,
       retries = 3,
@@ -45,7 +43,6 @@ export const downloadPageAudios = async (
           const fileName = url.split('/').pop();
           const dest = RNFS.DocumentDirectoryPath + '/' + fileName;
 
-          // Skip if already downloaded
           const exists = await RNFS.exists(dest);
           if (exists) {
             finishedFiles++;
@@ -53,7 +50,6 @@ export const downloadPageAudios = async (
             return;
           }
 
-          // Attempt download
           await RNFS.downloadFile({
             fromUrl: url,
             toFile: dest,
@@ -65,7 +61,6 @@ export const downloadPageAudios = async (
           return;
         } catch (err) {
           console.log('retrying', attempt, url);
-
           attempt++;
           if (attempt >= retries) {
             const errorMessage =
@@ -80,7 +75,6 @@ export const downloadPageAudios = async (
             onProgress?.(0);
             return;
           }
-          // Wait before retrying (exponential backoff: 1s, 2s, 4s…)
           await new Promise(res =>
             setTimeout(res, 1000 * Math.pow(2, attempt)),
           );
@@ -88,7 +82,6 @@ export const downloadPageAudios = async (
       }
     };
 
-    // Controlled concurrency loop
     for (const url of urls) {
       if (!url) continue;
 
