@@ -39,6 +39,7 @@
 	<array>
 		<string>UthmanTNB_v2-0.ttf</string>
 		<string>UthmanTN_v2-0.ttf</string>
+		<string>Uthmanic-HAFS.otf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>BootSplash</string>

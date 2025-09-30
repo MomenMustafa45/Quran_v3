@@ -22,8 +22,8 @@ const initialState: PageState = {
   currentPage: isRtl ? 604 : 1,
   soundType: 'word',
   soundColors: {
-    wordTextColor: COLORS.calligraphyBlack,
-    wordBgColor: COLORS.calligraphyBlack,
+    wordTextColor: COLORS.white,
+    wordBgColor: COLORS.goldAccent,
   },
 };
 

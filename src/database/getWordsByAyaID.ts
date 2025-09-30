@@ -1,16 +1,17 @@
 // wordService.ts
-import { executeQuery } from './connection';
+import { executeQuery, prepareParameters } from './connection';
 
 export const getWordsByAyaID = async (
   ayaId: number,
 ): Promise<{ word_id: number }[]> => {
   try {
+    const parametersPageId = prepareParameters([ayaId]);
+
     const result = await executeQuery(
       'SELECT word_id FROM Words WHERE ayat_id = ?',
-      [ayaId],
+      parametersPageId,
     );
 
-    console.log('🚀 ~ getWordsByAyaID ~ words:', result.rows);
     return result.rows;
   } catch (error) {
     console.error('Error fetching words by Aya ID:', error);

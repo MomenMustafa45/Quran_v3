@@ -76,7 +76,7 @@ export function prepareParameters(
   if (Array.isArray(parameters)) {
     const result: Record<string, any> = {};
     parameters.forEach((value, index) => {
-      result[`param${index}`] = value;
+      result[`param${index + 1}`] = value;
     });
     return result;
   }

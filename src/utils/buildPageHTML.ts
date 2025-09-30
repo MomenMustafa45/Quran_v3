@@ -5,8 +5,6 @@ export const buildPageHTML = (
   pageId: number,
   loadedFont: string,
 ) => {
-  const centerPage = pageId < 3 ? 'center' : 'flex-start';
-
   return `
     <html lang="ar">
       <head>
@@ -35,7 +33,7 @@ export const buildPageHTML = (
           body {
             display: flex;
             flex-direction: column;
-            justify-content: ${centerPage};
+            justify-content: flex-start;
             background-color: #fff;
             font-family: 'UthmaniHafs';
             flex: 1;
@@ -56,7 +54,7 @@ export const buildPageHTML = (
             justify-content: space-between;
           }
           .word {
-            font-size: calc(5vw * 0.95);
+            font-size: calc(5vw * 0.90);
             white-space: nowrap;
             font-weight:bold;
           }

@@ -100,10 +100,12 @@ class GRDBManager: NSObject {
       let dbQueue = try openDatabase()
       
       try dbQueue.read { db in
-        // Convert parameters to array
+        // Convert parameters to array in correct order
         var arguments: [DatabaseValueConvertible] = []
         if let params = parameters {
-          for (_, value) in params {
+          // Sort parameters by key to maintain order (param1, param2, param3...)
+          let sortedParams = params.sorted { $0.key < $1.key }
+          for (_, value) in sortedParams {
             if let stringValue = value as? String {
               arguments.append(stringValue)
             } else if let intValue = value as? Int {
@@ -112,6 +114,8 @@ class GRDBManager: NSObject {
               arguments.append(doubleValue)
             } else if let boolValue = value as? Bool {
               arguments.append(boolValue)
+            } else if value is NSNull {
+              arguments.append(Optional<String>.none as DatabaseValueConvertible)
             }
           }
         }
@@ -128,6 +132,7 @@ class GRDBManager: NSObject {
         ])
       }
     } catch {
+      print("❌ Database query error: \(error)")
       rejecter("DATABASE_ERROR", error.localizedDescription, error)
     }
   }

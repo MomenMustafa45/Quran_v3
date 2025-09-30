@@ -13,7 +13,6 @@ export interface PageDataResult {
 
 export async function getPageData(pageId: number): Promise<PageDataResult> {
   // Get all lines of the page
-  console.log('from here hello');
 
   const parametersPageId = prepareParameters([pageId]);
 

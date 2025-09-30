@@ -10,7 +10,6 @@ export const getAyahsByPageId = async (pageId: number): Promise<AyahType[]> => {
       parameters,
     );
 
-    console.log('🚀 ~ getAyahsByPageId ~ ayahs:', result.rows);
     return result.rows;
   } catch (error) {
     console.error('Error fetching ayahs by page ID:', error);
