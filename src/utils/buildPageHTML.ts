@@ -4,6 +4,7 @@ export const buildPageHTML = (
   data: QuranPageData,
   pageId: number,
   loadedFont: string,
+  wordFontSize: number = 5,
 ) => {
   return `
     <html lang="ar">
@@ -54,7 +55,7 @@ export const buildPageHTML = (
             justify-content: space-between;
           }
           .word {
-            font-size: calc(5vw * 0.90);
+            font-size: calc(${wordFontSize}vw * 0.90);
             white-space: nowrap;
             font-weight:bold;
           }

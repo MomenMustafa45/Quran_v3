@@ -16,6 +16,7 @@ export interface PageState {
   currentPage: number;
   soundType: SoundType;
   soundColors: SoundColorsType;
+  wordFontSize: number;
 }
 
 const initialState: PageState = {
@@ -25,6 +26,7 @@ const initialState: PageState = {
     wordTextColor: COLORS.white,
     wordBgColor: COLORS.goldAccent,
   },
+  wordFontSize: 5,
 };
 
 export const pageSlice = createSlice({
@@ -40,11 +42,13 @@ export const pageSlice = createSlice({
     setSoundColors: (state, action: PayloadAction<SoundColorsType>) => {
       state.soundColors = { ...state.soundColors, ...action.payload };
     },
+    setWordFontSize: (state, action: PayloadAction<number>) => {
+      state.wordFontSize = action.payload;
+    },
   },
 });
 
-// Action creators are generated for each case reducer function
-export const { setCurrentPage, setSoundType, setSoundColors } =
+export const { setCurrentPage, setSoundType, setSoundColors, setWordFontSize } =
   pageSlice.actions;
 
 export default pageSlice.reducer;

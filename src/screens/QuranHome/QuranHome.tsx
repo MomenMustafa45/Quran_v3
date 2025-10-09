@@ -13,7 +13,7 @@ import BootSplash from 'react-native-bootsplash';
 import { getItem } from '../../../storage';
 import { STORAGE_KEYS } from '../../constants/storageKeys';
 import { useAppDispatch } from '../../store/hooks/storeHooks';
-import { setCurrentPage } from '../../store/slices/pageSlice';
+import { setCurrentPage, setWordFontSize } from '../../store/slices/pageSlice';
 import PageModal from '../../components/modals/PageModal/PageModal';
 import useQuranModals from './hooks/useQuranModals';
 import SurasModal from '../../components/modals/SurasModal/SurasModal';
@@ -59,21 +59,29 @@ const QuranHome = () => {
     }
   }, [dispatch]);
 
+  const getSavedWordFontSize = useCallback(() => {
+    const fontSizeWord = getItem(STORAGE_KEYS.WORD_FONT_SIZE);
+    if (fontSizeWord) {
+      dispatch(setWordFontSize(Number(fontSizeWord)));
+    }
+  }, [dispatch]);
+
   useEffect(() => {
     const init = async () => {
       const font = await loadFont();
-      console.log('🚀 ~ init ~ font:', font);
       loadedFontRef.current = font;
 
       const [surasData, juzsData] = await Promise.all([getSuras(), getJuzs()]);
       setSuras(surasData);
       setJuzs(juzsData);
 
+      getSavedPaged();
+      getSavedWordFontSize();
+
       await BootSplash.hide({ fade: true });
     };
     init();
-    getSavedPaged();
-  }, [getSavedPaged]);
+  }, [dispatch, getSavedPaged, getSavedWordFontSize]);
 
   const renderItem = useCallback(
     ({ item }: { item: number }) => (

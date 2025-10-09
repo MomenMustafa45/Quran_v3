@@ -6,7 +6,7 @@ import AppInput from '../../AppInput/AppInput';
 import QuranMenuItem from '../../ModalMainItem/ModalMainItem';
 import { styles } from './styles';
 import { QuranAyahType } from '../../../database/types/quranAyah';
-import { useDebounce } from './hooks/useDebounce';
+import { useDebounce } from '../../../hooks/useDebounce';
 import { searchAyats } from '../../../database/searchAyahs';
 
 type SearchModalProps = {

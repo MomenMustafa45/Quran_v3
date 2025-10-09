@@ -6,15 +6,18 @@ import { styles } from './styles';
 import { COLORS } from '../../../constants/colors';
 import AppColorPick, { ColorPickMode } from '../../AppColorPick/AppColorPick';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
-import { getItem } from '../../../../storage';
+import { getItem, setItem } from '../../../../storage';
 import {
   setSoundColors,
+  setWordFontSize,
   SoundColorsType,
 } from '../../../store/slices/pageSlice';
 import {
   useAppDispatch,
   useAppSelector,
 } from '../../../store/hooks/storeHooks';
+import Slider from '@react-native-community/slider';
+import AppText from '../../AppText/AppText';
 
 type SettingsModalProps = {
   visible: boolean;
@@ -28,8 +31,12 @@ const colorBtns = [
   { id: 4, color: COLORS.goldAccent },
 ];
 
+const MIN_FONT_SIZE = 4.0;
+const MAX_FONT_SIZE = 5.5;
+
 const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
   const soundColors = useAppSelector(state => state.page.soundColors);
+  const wordFontSize = useAppSelector(state => state.page.wordFontSize);
   const dispatch = useAppDispatch();
 
   const getStoredColor = useCallback(() => {
@@ -62,6 +69,12 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
   const soundTxtHandler = (color: string) => {
     dispatch(setSoundColors({ ...soundColors, wordTextColor: color }));
   };
+
+  const handleFontSizeChange = (value: number) => {
+    const valueFixed = value.toFixed(1);
+    setItem(STORAGE_KEYS.WORD_FONT_SIZE, valueFixed.toString());
+    dispatch(setWordFontSize(Number(valueFixed)));
+  };
   return (
     <AppModal
       visible={visible}
@@ -90,6 +103,25 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
           setTextColorPicked={soundTxtHandler}
           setBgTextColorPicked={soundBgTxtHandler}
         />
+        <View>
+          <View style={styles.wordFontTitleContiner}>
+            <AppText style={styles.wordFontSizeTitle}>{wordFontSize}</AppText>
+            <AppText style={styles.wordFontSizeTitle}>حجم الكلمة</AppText>
+          </View>
+          <Slider
+            style={styles.sliderContainer}
+            minimumValue={MIN_FONT_SIZE}
+            maximumValue={MAX_FONT_SIZE}
+            minimumTrackTintColor={COLORS.goldAccent}
+            maximumTrackTintColor={COLORS.lightCream}
+            value={wordFontSize}
+            onSlidingComplete={handleFontSizeChange}
+          />
+          <AppText style={styles.wordFontSizeTitle}>
+            ملاحظة: تأكد من ضبط حجم الخط بما يتناسب مع شاشة جهازك حتى لا تظهر
+            الكلمات خارج إطار الشاشة.
+          </AppText>
+        </View>
       </View>
     </AppModal>
   );

@@ -10,6 +10,7 @@ import { COLORS } from '../../../../constants/colors';
 import AppText from '../../../../components/AppText/AppText';
 import { styles } from './styles';
 import { View } from 'react-native';
+import { useAppSelector } from '../../../../store/hooks/storeHooks';
 
 type QuranPageProps = {
   pageId: number;
@@ -37,20 +38,20 @@ const QuranPage = ({
       stopCurrentSound,
     },
   );
+  const wordFontSize = useAppSelector(state => state.page.wordFontSize);
 
   /** Load HTML content for the page */
   useEffect(() => {
     const loadPage = async () => {
       setIsLoadingContent(true);
       const data: QuranPageData = await getPageData(pageId);
-      const pageHtml = buildPageHTML(data, pageId, loadedFont);
+      const pageHtml = buildPageHTML(data, pageId, loadedFont, wordFontSize);
       setHtmlContent(pageHtml);
       setIsLoadingContent(false);
     };
     loadPage();
-  }, [pageId, loadedFont]);
+  }, [pageId, loadedFont, wordFontSize]);
 
-  console.log('🚀 ~ QuranPage ~ isLoadingContent:', isLoadingContent);
   if (isLoadingContent) {
     return null;
   }
