@@ -39,18 +39,24 @@ const QuranPage = ({
     },
   );
   const wordFontSize = useAppSelector(state => state.page.wordFontSize);
+  const isDarkMode = useAppSelector(state => state.page.isDarkMode);
 
   /** Load HTML content for the page */
   useEffect(() => {
     const loadPage = async () => {
       setIsLoadingContent(true);
       const data: QuranPageData = await getPageData(pageId);
-      const pageHtml = buildPageHTML(data, pageId, loadedFont, wordFontSize);
+      const pageHtml = buildPageHTML({
+        data,
+        loadedFont,
+        wordFontSize,
+        isDarkMode,
+      });
       setHtmlContent(pageHtml);
       setIsLoadingContent(false);
     };
     loadPage();
-  }, [pageId, loadedFont, wordFontSize]);
+  }, [pageId, loadedFont, wordFontSize, isDarkMode]);
 
   if (isLoadingContent) {
     return null;

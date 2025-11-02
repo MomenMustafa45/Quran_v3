@@ -1,11 +1,19 @@
+import { COLORS } from '../constants/colors';
 import { QuranPageData } from '../database/types/quranPageData';
 
-export const buildPageHTML = (
-  data: QuranPageData,
-  pageId: number,
-  loadedFont: string,
-  wordFontSize: number = 5,
-) => {
+type BuildPageHTMLParamTypes = {
+  data: QuranPageData;
+  loadedFont: string;
+  wordFontSize: number;
+  isDarkMode: boolean;
+};
+
+export const buildPageHTML = ({
+  data,
+  loadedFont,
+  wordFontSize,
+  isDarkMode,
+}: BuildPageHTMLParamTypes) => {
   return `
     <html lang="ar">
       <head>
@@ -35,7 +43,7 @@ export const buildPageHTML = (
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            background-color: #fff;
+            background-color: ${isDarkMode ? COLORS.dark : COLORS.whiteGray};
             font-family: 'UthmaniHafs';
             flex: 1;
             padding:0 4vw;
@@ -58,6 +66,7 @@ export const buildPageHTML = (
             font-size: calc(${wordFontSize}vw * 0.90);
             white-space: nowrap;
             font-weight:bold;
+            color:${isDarkMode ? COLORS.whiteGray : COLORS.dark};
           }
             .surah_title{
             display: flex;
@@ -67,6 +76,7 @@ export const buildPageHTML = (
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            color:${isDarkMode ? COLORS.whiteGray : COLORS.dark};
             }
         </style>
       </head>
@@ -91,7 +101,7 @@ export const buildPageHTML = (
           text-anchor="middle"
           font-size="16"
           font-family="UthmanicHafs, 'Scheherazade New', serif"
-          fill="#1b1b1b">
+          fill=${isDarkMode ? COLORS.whiteGray : COLORS.dark}>
       ${l.line.surah_name || ''}
     </text>
 </svg>
@@ -111,7 +121,7 @@ export const buildPageHTML = (
                   const wordId = `${w.word_id}`;
 
                   return `
-                  ${`<span id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', aya: '${w.ayat_id}' }))">${w.text_uthmani}</span>`}
+                  ${`<p id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', aya: '${w.ayat_id}' }))">${w.text_uthmani}</p>`}
                   `;
                 })
                 .join(' ')}

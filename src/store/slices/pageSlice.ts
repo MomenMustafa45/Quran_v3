@@ -17,6 +17,7 @@ export interface PageState {
   soundType: SoundType;
   soundColors: SoundColorsType;
   wordFontSize: number;
+  isDarkMode: boolean;
 }
 
 const initialState: PageState = {
@@ -26,7 +27,8 @@ const initialState: PageState = {
     wordTextColor: COLORS.white,
     wordBgColor: COLORS.goldAccent,
   },
-  wordFontSize: 5,
+  wordFontSize: 5.5,
+  isDarkMode: false,
 };
 
 export const pageSlice = createSlice({
@@ -45,10 +47,18 @@ export const pageSlice = createSlice({
     setWordFontSize: (state, action: PayloadAction<number>) => {
       state.wordFontSize = action.payload;
     },
+    setIsDarkMode: (state, action: PayloadAction<boolean>) => {
+      state.isDarkMode = action.payload;
+    },
   },
 });
 
-export const { setCurrentPage, setSoundType, setSoundColors, setWordFontSize } =
-  pageSlice.actions;
+export const {
+  setCurrentPage,
+  setSoundType,
+  setSoundColors,
+  setWordFontSize,
+  setIsDarkMode,
+} = pageSlice.actions;
 
 export default pageSlice.reducer;

@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { Switch, SwitchChangeEvent, View } from 'react-native';
 import React, { useCallback, useEffect } from 'react';
 import AppModal from '../../AppModal/AppModal';
 import { QuranModalTypes } from '../../../screens/QuranHome/hooks/useQuranModals';
@@ -8,6 +8,7 @@ import AppColorPick, { ColorPickMode } from '../../AppColorPick/AppColorPick';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
 import { getItem, setItem } from '../../../../storage';
 import {
+  setIsDarkMode,
   setSoundColors,
   setWordFontSize,
   SoundColorsType,
@@ -32,11 +33,12 @@ const colorBtns = [
 ];
 
 const MIN_FONT_SIZE = 4.0;
-const MAX_FONT_SIZE = 5.5;
+const MAX_FONT_SIZE = 6.0;
 
 const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
   const soundColors = useAppSelector(state => state.page.soundColors);
   const wordFontSize = useAppSelector(state => state.page.wordFontSize);
+  const isDarkMode = useAppSelector(state => state.page.isDarkMode);
   const dispatch = useAppDispatch();
 
   const getStoredColor = useCallback(() => {
@@ -75,6 +77,12 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
     setItem(STORAGE_KEYS.WORD_FONT_SIZE, valueFixed.toString());
     dispatch(setWordFontSize(Number(valueFixed)));
   };
+
+  const changeToDarkModeHandler = (event: SwitchChangeEvent) => {
+    const changedValue = event.nativeEvent.value;
+    setItem(STORAGE_KEYS.IS_DARK_MODE, changedValue);
+    dispatch(setIsDarkMode(changedValue));
+  };
   return (
     <AppModal
       visible={visible}
@@ -103,6 +111,24 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
           setTextColorPicked={soundTxtHandler}
           setBgTextColorPicked={soundBgTxtHandler}
         />
+
+        {/* dark mode switcher */}
+        <View style={styles.darkChangeContainer}>
+          <AppText style={styles.wordFontSizeTitle}>
+            الوضع {isDarkMode ? 'الليلي' : 'النهاري'}
+          </AppText>
+          <Switch
+            thumbColor={COLORS.deepGold}
+            value={isDarkMode}
+            onChange={changeToDarkModeHandler}
+            trackColor={{
+              false: COLORS.whiteGray,
+              true: COLORS.dark,
+            }}
+          />
+        </View>
+
+        {/* word size changer */}
         <View>
           <View style={styles.wordFontTitleContiner}>
             <AppText style={styles.wordFontSizeTitle}>{wordFontSize}</AppText>

@@ -6,4 +6,6 @@ export const COLORS = {
   calligraphyBlack: '#2D2B29',
   mutedOlive: '#8B8A67',
   white: '#fff',
+  dark: '#333333',
+  whiteGray: '#E8E8E8',
 };

@@ -13,7 +13,11 @@ import BootSplash from 'react-native-bootsplash';
 import { getItem } from '../../../storage';
 import { STORAGE_KEYS } from '../../constants/storageKeys';
 import { useAppDispatch } from '../../store/hooks/storeHooks';
-import { setCurrentPage, setWordFontSize } from '../../store/slices/pageSlice';
+import {
+  setCurrentPage,
+  setIsDarkMode,
+  setWordFontSize,
+} from '../../store/slices/pageSlice';
 import PageModal from '../../components/modals/PageModal/PageModal';
 import useQuranModals from './hooks/useQuranModals';
 import SurasModal from '../../components/modals/SurasModal/SurasModal';
@@ -59,10 +63,14 @@ const QuranHome = () => {
     }
   }, [dispatch]);
 
-  const getSavedWordFontSize = useCallback(() => {
+  const getSavedPageSettings = useCallback(() => {
     const fontSizeWord = getItem(STORAGE_KEYS.WORD_FONT_SIZE);
+    const isDarkMode = getItem(STORAGE_KEYS.IS_DARK_MODE);
     if (fontSizeWord) {
       dispatch(setWordFontSize(Number(fontSizeWord)));
+    }
+    if (isDarkMode) {
+      dispatch(setIsDarkMode(Boolean(isDarkMode)));
     }
   }, [dispatch]);
 
@@ -76,12 +84,12 @@ const QuranHome = () => {
       setJuzs(juzsData);
 
       getSavedPaged();
-      getSavedWordFontSize();
+      getSavedPageSettings();
 
       await BootSplash.hide({ fade: true });
     };
     init();
-  }, [dispatch, getSavedPaged, getSavedWordFontSize]);
+  }, [dispatch, getSavedPaged, getSavedPageSettings]);
 
   const renderItem = useCallback(
     ({ item }: { item: number }) => (

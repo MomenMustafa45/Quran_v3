@@ -26,4 +26,10 @@ export const styles = StyleSheet.create({
     textAlign: 'right',
     color: COLORS.calligraphyBlack,
   },
+  darkChangeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    direction: 'rtl',
+  },
 });
