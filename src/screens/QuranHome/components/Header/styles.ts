@@ -1,5 +1,4 @@
-import { I18nManager, StyleSheet } from 'react-native';
-import { COLORS } from '../../../../constants/colors';
+import { StyleSheet } from 'react-native';
 import {
   flexDirectionRow,
   margins,
@@ -9,7 +8,6 @@ import {
 export const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: flexDirectionRow,
-    backgroundColor: COLORS.backgroundBeige,
     padding: paddings.sm,
   },
   rightIconsContainer: {

@@ -43,10 +43,10 @@ export const buildPageHTML = ({
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            background-color: ${isDarkMode ? COLORS.dark : COLORS.whiteGray};
             font-family: 'UthmaniHafs';
             flex: 1;
             padding:0 4vw;
+            background-color:tansparent;
  }
           .line {
             display: flex;

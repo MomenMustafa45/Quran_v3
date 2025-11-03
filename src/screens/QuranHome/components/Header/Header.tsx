@@ -1,23 +1,16 @@
 import { View } from 'react-native';
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { QuranSuraType } from '../../../../database/types/quranSuras';
-import { linearSearchSurah } from '../../utils/getSurahByPage';
 import { QuranJuzType } from '../../../../database/types/qraunJuz';
-import { getJuzByPage } from '../../utils/getJuzByPage';
 import { styles } from './styles';
-import {
-  useAppDispatch,
-  useAppSelector,
-} from '../../../../store/hooks/storeHooks';
+import { useAppSelector } from '../../../../store/hooks/storeHooks';
 import AppButton from '../../../../components/AppButton/AppButton';
-import { getItem, setItem } from '../../../../../storage';
-import { STORAGE_KEYS } from '../../../../constants/storageKeys';
-import { setSoundType, SoundType } from '../../../../store/slices/pageSlice';
 import { QuranModalTypes } from '../../hooks/useQuranModals';
+import { COLORS } from '../../../../constants/colors';
+import { BUTTON_CONFIGS } from './utils/headerBtns';
+import useHeaderActions from '../../hooks/useHeaderActions';
 
-const soundTypes: Array<'word' | 'ayah' | 'page'> = ['word', 'ayah', 'page'];
-
-const soundTypeWord = {
+export const soundTypeWord = {
   page: 'صفحة',
   word: 'كلمة',
   ayah: 'ايه',
@@ -30,74 +23,49 @@ type HeaderProps = {
 };
 
 const Header = ({ suras, juzs, showModal }: HeaderProps) => {
-  const currentPage = useAppSelector(state => state.page.currentPage);
-  const soundType = useAppSelector(state => state.page.soundType);
-  const dispatch = useAppDispatch();
-  const sura = linearSearchSurah(suras, currentPage);
+  const isDarkMode = useAppSelector(state => state.page.isDarkMode);
+  const { juz, sura, soundType, switchSoundTypeHandler, currentPage } =
+    useHeaderActions({
+      suras,
+      juzs,
+    });
 
-  const juz = getJuzByPage(juzs, currentPage);
-
-  const switchSoundTypeHandler = () => {
-    const currentIndex = soundTypes.indexOf(soundType);
-    const nextIndex = (currentIndex + 1) % soundTypes.length;
-    const switchedSoundType = soundTypes[nextIndex];
-
-    setItem(STORAGE_KEYS.SOUND_TYPE, switchedSoundType);
-    dispatch(setSoundType(switchedSoundType));
-  };
-
-  const getInitialSoundType = () => {
-    const storageSoundType = getItem(STORAGE_KEYS.SOUND_TYPE);
-    if (storageSoundType) {
-      dispatch(setSoundType(String(storageSoundType) as SoundType));
-    }
-  };
-
-  useEffect(() => {
-    getInitialSoundType();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const onPressBtnHandler = useCallback(
+    (btnType: QuranModalTypes | null) => {
+      if (btnType) {
+        showModal(btnType);
+      } else {
+        switchSoundTypeHandler();
+      }
+    },
+    [showModal, switchSoundTypeHandler],
+  );
 
   return (
-    <View style={styles.headerContainer}>
+    <View
+      style={[
+        styles.headerContainer,
+        {
+          backgroundColor: isDarkMode
+            ? COLORS.calligraphyBlack
+            : COLORS.backgroundBeige,
+        },
+      ]}
+    >
       {/* right */}
       <View style={styles.btnsContainer}>
-        <AppButton
-          iconName="menu-book"
-          iconType="MaterialIcons"
-          title={currentPage.toString()}
-          onPress={() => showModal(QuranModalTypes.Page)}
-        />
-        <AppButton
-          iconName="note-text-outline"
-          iconType="MaterialCommunityIcons"
-          title={sura.result?.name_arabic}
-          onPress={() => showModal(QuranModalTypes.Suras)}
-        />
-        <AppButton
-          iconName="layers-outline"
-          iconType="Ionicons"
-          title={juz?.juz_number.toString()}
-          onPress={() => showModal(QuranModalTypes.Juz)}
-        />
-        <AppButton
-          iconName="sound"
-          iconType="AntDesign"
-          title={soundTypeWord[soundType]}
-          onPress={switchSoundTypeHandler}
-        />
-        <AppButton
-          iconName="search"
-          iconType="MaterialIcons"
-          title={'البحث'}
-          onPress={() => showModal(QuranModalTypes.Search)}
-        />
-        <AppButton
-          iconName="setting"
-          iconType="AntDesign"
-          title={'الاعدادات'}
-          onPress={() => showModal(QuranModalTypes.Settings)}
-        />
+        {BUTTON_CONFIGS.map(btn => (
+          <AppButton
+            key={btn.id}
+            iconName={btn.iconName}
+            iconType={btn.iconType}
+            title={btn.getTitle({ currentPage, juz, soundType, sura })}
+            onPress={() => onPressBtnHandler(btn.modalType)}
+            style={{
+              backgroundColor: isDarkMode ? COLORS.dark : COLORS.mutedOlive,
+            }}
+          />
+        ))}
       </View>
     </View>
   );

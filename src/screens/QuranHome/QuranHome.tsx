@@ -1,40 +1,27 @@
 import { View, FlatList, Dimensions, I18nManager } from 'react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback } from 'react';
 import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
-import { loadFont } from '../../utils/loadFont';
-import { getSuras } from '../../database/getSuras';
-import { QuranSuraType } from '../../database/types/quranSuras';
 import useQuranHomeActions from './hooks/useQuranHomeActions';
 import Header from './components/Header/Header';
-import { getJuzs } from '../../database/getJuzs';
-import { QuranJuzType } from '../../database/types/qraunJuz';
-import BootSplash from 'react-native-bootsplash';
-import { getItem } from '../../../storage';
-import { STORAGE_KEYS } from '../../constants/storageKeys';
-import { useAppDispatch } from '../../store/hooks/storeHooks';
-import {
-  setCurrentPage,
-  setIsDarkMode,
-  setWordFontSize,
-} from '../../store/slices/pageSlice';
+
 import PageModal from '../../components/modals/PageModal/PageModal';
 import useQuranModals from './hooks/useQuranModals';
 import SurasModal from '../../components/modals/SurasModal/SurasModal';
 import JuzModal from '../../components/modals/JuzModal/JuzModal';
 import SearchModal from '../../components/modals/SearchModal/SearchModal';
 import SettingsModal from '../../components/modals/SettingsModal/SettingsModal';
+import useHomeInitialActions from './hooks/useHomeInitialActions';
+import { useAppSelector } from '../../store/hooks/storeHooks';
+import { COLORS } from '../../constants/colors';
 
 const { width } = Dimensions.get('window');
 const isRtl = I18nManager.isRTL;
 
 const QuranHome = () => {
-  const loadedFontRef = useRef<string>('');
-  const [suras, setSuras] = useState<QuranSuraType[]>([]);
-  const [juzs, setJuzs] = useState<QuranJuzType[]>([]);
-  const [initialPage, setInitialPage] = useState<number | null>(null);
-  const dispatch = useAppDispatch();
+  const isDarkMode = useAppSelector(state => state.page.isDarkMode);
 
+  // sounds actions and words press functions
   const {
     flatListRef,
     playSound,
@@ -43,6 +30,7 @@ const QuranHome = () => {
     stopCurrentSound,
   } = useQuranHomeActions();
 
+  // home modal handlers and actions
   const {
     pageModal,
     hideModal,
@@ -53,43 +41,8 @@ const QuranHome = () => {
     surasModal,
   } = useQuranModals();
 
-  const getSavedPaged = useCallback(() => {
-    const savedPage = getItem(STORAGE_KEYS.CURRENT_PAGE);
-    if (savedPage) {
-      dispatch(setCurrentPage(Number(savedPage)));
-      setInitialPage(Number(savedPage) - 1);
-    } else {
-      setInitialPage(0);
-    }
-  }, [dispatch]);
-
-  const getSavedPageSettings = useCallback(() => {
-    const fontSizeWord = getItem(STORAGE_KEYS.WORD_FONT_SIZE);
-    const isDarkMode = getItem(STORAGE_KEYS.IS_DARK_MODE);
-    if (fontSizeWord) {
-      dispatch(setWordFontSize(Number(fontSizeWord)));
-    }
-    if (isDarkMode) {
-      dispatch(setIsDarkMode(Boolean(isDarkMode)));
-    }
-  }, [dispatch]);
-
-  useEffect(() => {
-    const init = async () => {
-      const font = await loadFont();
-      loadedFontRef.current = font;
-
-      const [surasData, juzsData] = await Promise.all([getSuras(), getJuzs()]);
-      setSuras(surasData);
-      setJuzs(juzsData);
-
-      getSavedPaged();
-      getSavedPageSettings();
-
-      await BootSplash.hide({ fade: true });
-    };
-    init();
-  }, [dispatch, getSavedPaged, getSavedPageSettings]);
+  // here actions for initail render of app
+  const { initialPage, juzs, suras, loadedFontRef } = useHomeInitialActions();
 
   const renderItem = useCallback(
     ({ item }: { item: number }) => (
@@ -102,11 +55,16 @@ const QuranHome = () => {
         />
       </View>
     ),
-    [playSound, stopCurrentSound],
+    [loadedFontRef, playSound, stopCurrentSound],
   );
 
   return (
-    <View style={styles.pageParent}>
+    <View
+      style={[
+        styles.pageParent,
+        { backgroundColor: isDarkMode ? COLORS.dark : COLORS.whiteGray },
+      ]}
+    >
       <Header juzs={juzs} suras={suras} showModal={showModal} />
 
       <FlatList

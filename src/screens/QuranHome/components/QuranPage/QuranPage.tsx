@@ -86,7 +86,10 @@ const QuranPage = ({
           ref={webViewRef}
           originWhitelist={['*']}
           source={{ html: htmlContent }}
-          style={styles.webview}
+          style={[
+            styles.webview,
+            { backgroundColor: isDarkMode ? COLORS.dark : COLORS.whiteGray },
+          ]}
           onMessage={event => {
             const { audio, word, aya } = JSON.parse(event.nativeEvent.data);
             handleWordClick(audio, word, aya);
