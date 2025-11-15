@@ -50,7 +50,13 @@ export async function executeQuery(
 ): Promise<DatabaseResult> {
   if (Platform.OS === 'ios') {
     await openDBIOS();
-    return await GRDBManager.executeQuery(query, parameters);
+
+    const iosParams: Record<string, any> = {};
+    Object.values(parameters).forEach((value, index) => {
+      iosParams[`param${index}`] = value;
+    });
+
+    return await GRDBManager.executeQuery(query, iosParams);
   } else {
     const db = await openDB();
     const paramsArray = Object.values(parameters);

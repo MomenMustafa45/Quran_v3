@@ -12,12 +12,17 @@ export type AyahType = {
 };
 
 export const searchAyats = async (query: string): Promise<QuranAyahType[]> => {
-  if (!query.trim()) return [];
+  try {
+    if (!query.trim()) return [];
 
-  const result = await executeQuery(
-    `SELECT * FROM Ayats WHERE text_arabic LIKE ?`,
-    [`%${query}%`],
-  );
+    const result = await executeQuery(
+      `SELECT * FROM Ayats WHERE text_arabic LIKE ?`,
+      [`%${query}%`],
+    );
 
-  return result.rows;
+    return result.rows;
+  } catch (error) {
+    console.log('🚀 ~ searchAyats ~ error:', error);
+    return [];
+  }
 };

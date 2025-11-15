@@ -2337,6 +2337,35 @@ PODS:
     - React-perflogger (= 0.80.2)
     - React-utils (= 0.80.2)
     - SocketRocket
+  - RestartNewArch (1.0.82):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - RNBootSplash (6.3.10):
     - boost
     - DoubleConversion
@@ -2810,6 +2839,7 @@ DEPENDENCIES:
   - ReactAppDependencyProvider (from `build/generated/ios`)
   - ReactCodegen (from `build/generated/ios`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - RestartNewArch (from `../node_modules/react-native-restart-newarch`)
   - RNBootSplash (from `../node_modules/react-native-bootsplash`)
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
@@ -2983,6 +3013,8 @@ EXTERNAL SOURCES:
     :path: build/generated/ios
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RestartNewArch:
+    :path: "../node_modules/react-native-restart-newarch"
   RNBootSplash:
     :path: "../node_modules/react-native-bootsplash"
   RNFS:
@@ -3084,6 +3116,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: 8df342c127fd0c1e30e8b9f71ff814c22414a7c0
   ReactCodegen: 439c427ccc115d71d16cc84256e5fbdc7fcef57a
   ReactCommon: 592ef441605638b95e533653259254b4bd35ff4f
+  RestartNewArch: 7c923bb7980e953eb1e1d8af5415888812f0f0b9
   RNBootSplash: 7f8f79309bc73584c50a630207b199e3f8d1438c
   RNFS: 89de7d7f4c0f6bafa05343c578f61118c8282ed8
   RNGestureHandler: db29d3e7edf41a11d133cc3ffd4029762376ed1a
