@@ -5,11 +5,12 @@ import { paddings, radius, shadowStyle } from '../../constants/desingSystem';
 export const styles = StyleSheet.create({
   input: {
     backgroundColor: COLORS.lightCream,
-    paddingHorizontal: paddings.md,
+    padding: paddings.md,
     marginHorizontal: paddings.md,
     borderRadius: radius.md,
     color: COLORS.calligraphyBlack,
     direction: 'rtl',
     ...shadowStyle,
+    textAlign: 'right',
   },
 });

@@ -45,13 +45,13 @@ export const buildPageHTML = ({
             justify-content: flex-start;
             font-family: 'UthmaniHafs';
             flex: 1;
-            padding:0 4vw;
+            padding:0 2vw;
             background-color:tansparent;
  }
           .line {
             display: flex;
             flex-direction: row-reverse;
-            align-items: flex-start;
+            align-items: center;
             width: 100%;
             white-space: nowrap;
             height:6.5vh;
@@ -63,7 +63,7 @@ export const buildPageHTML = ({
             justify-content: space-between;
           }
           .word {
-            font-size: calc(${wordFontSize}vw * 0.90);
+            font-size: calc(${wordFontSize}vw * 0.99);
             white-space: nowrap;
             font-weight:bold;
             color:${isDarkMode ? COLORS.whiteGray : COLORS.dark};
