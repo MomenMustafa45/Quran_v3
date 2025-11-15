@@ -8,6 +8,7 @@ import { styles } from './styles';
 import QuranMenuItem from '../../ModalMainItem/ModalMainItem';
 import AppInput from '../../AppInput/AppInput';
 import PageItem from './components/PageItem/PageItem';
+import { convertArabicToEnglishNumbers } from '../../../utils/convertArabicToEnglishNumbers';
 
 type PageModalProps = {
   visible: boolean;
@@ -27,17 +28,16 @@ const PageModal = ({ visible, onClose, onSelectPage }: PageModalProps) => {
     loadData();
   }, []);
 
-  // ✅ Memoized filtering (only recalculates when query/pagesMeta changes)
   const filteredData = useMemo(() => {
     if (!query.trim()) return pagesMeta;
-    const pageNum = Number(query);
+    const normalized = convertArabicToEnglishNumbers(query.trim());
+    const pageNum = Number(normalized);
     if (isNaN(pageNum)) return [];
     return pagesMeta.filter(item =>
-      item.page_number.toString().includes(query),
+      item.page_number.toString().includes(normalized),
     );
   }, [query, pagesMeta]);
 
-  // ✅ Handles selecting a page
   const onClickPageHandler = useCallback(
     (item: QuranMenuPageType) => {
       onSelectPage(item.page_number);
@@ -47,7 +47,6 @@ const PageModal = ({ visible, onClose, onSelectPage }: PageModalProps) => {
     [onClose, onSelectPage],
   );
 
-  // ✅ List item renderer
   const renderItem = useCallback(
     ({ item }: { item: QuranMenuPageType }) => {
       return <PageItem item={item} onClickPageHandler={onClickPageHandler} />;
@@ -67,6 +66,7 @@ const PageModal = ({ visible, onClose, onSelectPage }: PageModalProps) => {
         onChangeText={setQuery}
         keyboardType="numeric"
         placeholder="ادخل رقم الصفحة..."
+        maxLength={3}
         onSubmitEditing={() => {
           const pageNumber = Number(query);
           if (pageNumber >= 1 && pageNumber <= 604) {

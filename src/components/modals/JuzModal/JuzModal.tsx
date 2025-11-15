@@ -6,6 +6,7 @@ import AppInput from '../../AppInput/AppInput';
 import QuranMenuItem from '../../ModalMainItem/ModalMainItem';
 import { styles } from './styles';
 import { QuranJuzType } from '../../../database/types/qraunJuz';
+import { convertArabicToEnglishNumbers } from '../../../utils/convertArabicToEnglishNumbers';
 
 type JuzModalProps = {
   visible: boolean;
@@ -26,7 +27,12 @@ const JuzModal = ({ visible, onClose, onSelectPage, juzs }: JuzModalProps) => {
 
   const filteredData = () => {
     if (!query.trim()) return juzs;
-    return juzs.filter(item => item.juz_number.toString().includes(query));
+
+    const normalized = convertArabicToEnglishNumbers(query.trim());
+
+    if (Number(normalized) > 30) return [];
+
+    return juzs.filter(item => item.juz_number.toString().includes(normalized));
   };
 
   const renderItem = ({ item }: { item: QuranJuzType }) => (
@@ -57,6 +63,7 @@ const JuzModal = ({ visible, onClose, onSelectPage, juzs }: JuzModalProps) => {
         onChangeText={setQuery}
         keyboardType="numeric"
         placeholder="ادخل رقم الجزء..."
+        maxLength={2}
       />
       <View>{renderListHeader()}</View>
       <FlatList
