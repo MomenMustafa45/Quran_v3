@@ -14,21 +14,40 @@ import {
   BannerAd,
   BannerAdSize,
   TestIds,
-  useForeground,
+  MobileAds,
 } from 'react-native-google-mobile-ads';
-import { useRef } from 'react';
+import { useEffect } from 'react';
 
+// Use different ad unit IDs for iOS and Android
 const adUnitId = __DEV__
   ? TestIds.ADAPTIVE_BANNER
-  : 'ca-app-pub-5893673534075496/5813472914';
+  : Platform.select({
+      ios: 'ca-app-pub-5893673534075496/5813472914',
+      android: 'ca-app-pub-5893673534075496/5813472914',
+    }) || 'ca-app-pub-5893673534075496/5813472914';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
-  const bannerRef = useRef<BannerAd>(null);
 
-  useForeground(() => {
-    Platform.OS === 'ios' && bannerRef.current?.load();
-  });
+  useEffect(() => {
+    // Initialize Mobile Ads with better configuration
+    MobileAds()
+      .initialize()
+      .then(() => {
+        console.log('AdMob initialized successfully');
+      })
+      .catch(error => {
+        console.error('AdMob initialization error:', error);
+      });
+  }, []);
+
+  const handleAdLoaded = () => {
+    console.log('Banner ad loaded successfully');
+  };
+
+  const handleAdFailedToLoad = (error: Error) => {
+    console.error('Banner ad failed to load:', error);
+  };
 
   return (
     <SafeAreaProvider>
@@ -36,7 +55,6 @@ function App() {
         <KeyboardAvoidingView
           style={styles.container}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          // keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 40}
         >
           <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
           <Provider store={store}>
@@ -44,10 +62,16 @@ function App() {
           </Provider>
           <Toast />
         </KeyboardAvoidingView>
+
+        {/* Banner Ad */}
         <BannerAd
-          ref={bannerRef}
           unitId={adUnitId}
           size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          onAdLoaded={handleAdLoaded}
+          onAdFailedToLoad={handleAdFailedToLoad}
+          requestOptions={{
+            requestNonPersonalizedAdsOnly: false,
+          }}
         />
       </SafeAreaView>
     </SafeAreaProvider>
