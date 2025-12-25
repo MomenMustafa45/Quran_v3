@@ -4,6 +4,7 @@ export enum WORD_TYPES {
 }
 
 export type QuranWordType = {
+  word_qpc_v4: string;
   audio_url: string;
   ayat_id: number;
   line_number: number;

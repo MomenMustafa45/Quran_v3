@@ -42,20 +42,19 @@ const QuranHome = () => {
   } = useQuranModals();
 
   // here actions for initail render of app
-  const { initialPage, juzs, suras, loadedFontRef } = useHomeInitialActions();
+  const { initialPage, juzs, suras } = useHomeInitialActions();
 
   const renderItem = useCallback(
     ({ item }: { item: number }) => (
       <View style={styles.pageItem}>
         <QuranPage
           pageId={item}
-          loadedFont={loadedFontRef.current}
           playSound={playSound}
           stopCurrentSound={stopCurrentSound}
         />
       </View>
     ),
-    [loadedFontRef, playSound, stopCurrentSound],
+    [playSound, stopCurrentSound],
   );
 
   return (

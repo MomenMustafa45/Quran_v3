@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
 import { getItem } from '../../../../storage';
 import {
@@ -7,7 +7,6 @@ import {
   setWordFontSize,
 } from '../../../store/slices/pageSlice';
 import { useAppDispatch } from '../../../store/hooks/storeHooks';
-import { loadFont } from '../../../utils/loadFont';
 import { QuranSuraType } from '../../../database/types/quranSuras';
 import { QuranJuzType } from '../../../database/types/qraunJuz';
 import BootSplash from 'react-native-bootsplash';
@@ -18,7 +17,6 @@ const useHomeInitialActions = () => {
   const [initialPage, setInitialPage] = useState<number | null>(null);
   const [suras, setSuras] = useState<QuranSuraType[]>([]);
   const [juzs, setJuzs] = useState<QuranJuzType[]>([]);
-  const loadedFontRef = useRef<string>('');
 
   const dispatch = useAppDispatch();
 
@@ -45,9 +43,6 @@ const useHomeInitialActions = () => {
 
   useEffect(() => {
     const init = async () => {
-      const font = await loadFont();
-      loadedFontRef.current = font;
-
       const [surasData, juzsData] = await Promise.all([getSuras(), getJuzs()]);
       setSuras(surasData);
       setJuzs(juzsData);
@@ -60,7 +55,7 @@ const useHomeInitialActions = () => {
     init();
   }, [dispatch, getSavedPaged, getSavedPageSettings]);
 
-  return { initialPage, suras, juzs, loadedFontRef };
+  return { initialPage, suras, juzs };
 };
 
 export default useHomeInitialActions;

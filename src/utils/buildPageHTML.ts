@@ -113,7 +113,11 @@ export const buildPageHTML = ({
             }
             return `
             <div id="${lineId}" class="line ${
-              l.line.is_centered === 1 ? 'center' : 'space-between'
+              l.line.is_centered === 1 ||
+              l.line.page_id < 3 ||
+              l.line.page_id > 590
+                ? 'center'
+                : 'space-between'
             }">
             
               ${l.words
@@ -121,7 +125,7 @@ export const buildPageHTML = ({
                   const wordId = `${w.word_id}`;
 
                   return `
-                  ${`<p id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', aya: '${w.ayat_id}' }))">${w.text_uthmani}</p>`}
+                  ${`<p id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', aya: '${w.ayat_id}' }))">${w.word_qpc_v4}</p>`}
                   `;
                 })
                 .join(' ')}

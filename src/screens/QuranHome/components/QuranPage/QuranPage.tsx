@@ -11,10 +11,10 @@ import AppText from '../../../../components/AppText/AppText';
 import { styles } from './styles';
 import { View } from 'react-native';
 import { useAppSelector } from '../../../../store/hooks/storeHooks';
+import { loadFont } from '../../../../utils/loadFont';
 
 type QuranPageProps = {
   pageId: number;
-  loadedFont: string;
   playSound: (
     filePath: string,
     onFinished?: () => void,
@@ -23,12 +23,7 @@ type QuranPageProps = {
   stopCurrentSound: () => void;
 };
 
-const QuranPage = ({
-  pageId,
-  loadedFont,
-  playSound,
-  stopCurrentSound,
-}: QuranPageProps) => {
+const QuranPage = ({ pageId, playSound, stopCurrentSound }: QuranPageProps) => {
   const [htmlContent, setHtmlContent] = useState<string>('');
   const [isLoadingContent, setIsLoadingContent] = useState(true);
   const { webViewRef, handleWordClick, downloadProgress } = useQuranPageActions(
@@ -42,13 +37,17 @@ const QuranPage = ({
   const isDarkMode = useAppSelector(state => state.page.isDarkMode);
 
   /** Load HTML content for the page */
+  console.log('from here page');
+
   useEffect(() => {
     const loadPage = async () => {
       setIsLoadingContent(true);
       const data: QuranPageData = await getPageData(pageId);
+      const loadedFont = await loadFont(pageId);
+
       const pageHtml = buildPageHTML({
         data,
-        loadedFont,
+        loadedFont: loadedFont || '',
         wordFontSize,
         isDarkMode,
       });
@@ -56,7 +55,7 @@ const QuranPage = ({
       setIsLoadingContent(false);
     };
     loadPage();
-  }, [pageId, loadedFont, wordFontSize, isDarkMode]);
+  }, [pageId, wordFontSize, isDarkMode]);
 
   if (isLoadingContent) {
     return null;
