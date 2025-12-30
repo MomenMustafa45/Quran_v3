@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
 import { getItem } from '../../../../storage';
 import {
@@ -41,7 +41,7 @@ const useHomeInitialActions = () => {
     }
   }, [dispatch]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const init = async () => {
       const [surasData, juzsData] = await Promise.all([getSuras(), getJuzs()]);
       setSuras(surasData);

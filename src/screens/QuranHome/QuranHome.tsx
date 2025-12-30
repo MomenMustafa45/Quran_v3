@@ -1,5 +1,5 @@
 import { View, FlatList, Dimensions, I18nManager } from 'react-native';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
 import useQuranHomeActions from './hooks/useQuranHomeActions';
@@ -56,6 +56,12 @@ const QuranHome = () => {
     ),
     [playSound, stopCurrentSound],
   );
+
+  useEffect(() => {
+    if (flatListRef.current && initialPage && initialPage > 0) {
+      scrollToIndex(initialPage);
+    }
+  }, [flatListRef, initialPage, scrollToIndex]);
 
   return (
     <View
