@@ -19,7 +19,7 @@ SQLite.enablePromise(true);
 export async function openDB() {
   if (!dbInstance) {
     dbInstance = await SQLite.openDatabase({
-      name: 'quran_arabic.db',
+      name: 'quran_arabic2.db',
       createFromLocation: 1,
     });
   }

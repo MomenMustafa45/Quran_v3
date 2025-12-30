@@ -18,9 +18,9 @@ class GRDBManager: NSObject {
     // Try different possible locations
     let possiblePaths = [
       // If file is in blue 'res' folder reference
-      Bundle.main.path(forResource: "quran_arabic", ofType: "db", inDirectory: "res"),
+      Bundle.main.path(forResource: "quran_arabic2", ofType: "db", inDirectory: "res"),
       // If file is directly in main bundle
-      Bundle.main.path(forResource: "quran_arabic", ofType: "db"),
+      Bundle.main.path(forResource: "quran_arabic2", ofType: "db"),
     ]
     
     for path in possiblePaths {
@@ -62,7 +62,7 @@ class GRDBManager: NSObject {
     }
     
     guard let dbPath = getDatabasePath() else {
-      throw NSError(domain: "GRDBManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Database file not found in app bundle. Check that quran_arabic.db is added to the project in a 'res' folder."])
+      throw NSError(domain: "GRDBManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Database file not found in app bundle. Check that quran_arabic2.db is added to the project in a 'res' folder."])
     }
     
     print("🚀 Opening database at: \(dbPath)")
