@@ -1,5 +1,5 @@
-import { View, FlatList, Dimensions, I18nManager } from 'react-native';
-import React, { useCallback, useEffect } from 'react';
+import { View, FlatList, I18nManager, useWindowDimensions } from 'react-native';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
 import useQuranHomeActions from './hooks/useQuranHomeActions';
@@ -15,12 +15,13 @@ import useHomeInitialActions from './hooks/useHomeInitialActions';
 import { useAppSelector } from '../../store/hooks/storeHooks';
 import { COLORS } from '../../constants/colors';
 
-const { width } = Dimensions.get('window');
 const isRtl = I18nManager.isRTL;
 
 const QuranHome = () => {
   const isDarkMode = useAppSelector(state => state.page.isDarkMode);
+  const { width, height } = useWindowDimensions();
 
+  const isPortrait = useMemo(() => height >= width, [height, width]);
   // sounds actions and words press functions
   const {
     flatListRef,
@@ -46,15 +47,17 @@ const QuranHome = () => {
 
   const renderItem = useCallback(
     ({ item }: { item: number }) => (
-      <View style={styles.pageItem}>
+      <View style={[styles.pageItem, { width }]}>
         <QuranPage
           pageId={item}
           playSound={playSound}
           stopCurrentSound={stopCurrentSound}
+          isPortrait={isPortrait}
+          width={width}
         />
       </View>
     ),
-    [playSound, stopCurrentSound],
+    [playSound, stopCurrentSound, width, isPortrait],
   );
 
   useEffect(() => {
@@ -73,6 +76,7 @@ const QuranHome = () => {
       <Header juzs={juzs} suras={suras} showModal={showModal} />
 
       <FlatList
+        key={width}
         ref={flatListRef}
         data={Array.from({ length: 604 }, (_, i) => i + 1)}
         initialScrollIndex={initialPage}

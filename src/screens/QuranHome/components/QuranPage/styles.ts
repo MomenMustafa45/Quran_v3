@@ -1,7 +1,5 @@
-import { Dimensions, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { fontSizes } from '../../../../constants/desingSystem';
-
-const { width } = Dimensions.get('window');
 
 export const styles = StyleSheet.create({
   pageParent: {
@@ -9,11 +7,6 @@ export const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
-  },
-  pageContainer: {
-    width,
-    flex: 1,
-    padding: 8,
   },
   header: {
     height: 50,

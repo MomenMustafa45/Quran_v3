@@ -21,11 +21,18 @@ type QuranPageProps = {
     onStop?: () => void,
   ) => void;
   stopCurrentSound: () => void;
+  isPortrait: boolean;
+  width: number;
 };
 
-const QuranPage = ({ pageId, playSound, stopCurrentSound }: QuranPageProps) => {
+const QuranPage = ({
+  pageId,
+  playSound,
+  stopCurrentSound,
+  isPortrait,
+  width,
+}: QuranPageProps) => {
   const [htmlContent, setHtmlContent] = useState<string>('');
-  const [isLoadingContent, setIsLoadingContent] = useState(true);
   const { webViewRef, handleWordClick, downloadProgress } = useQuranPageActions(
     {
       pageId,
@@ -36,12 +43,8 @@ const QuranPage = ({ pageId, playSound, stopCurrentSound }: QuranPageProps) => {
   const wordFontSize = useAppSelector(state => state.page.wordFontSize);
   const isDarkMode = useAppSelector(state => state.page.isDarkMode);
 
-  /** Load HTML content for the page */
-  console.log('from here page');
-
   useEffect(() => {
     const loadPage = async () => {
-      setIsLoadingContent(true);
       const data: QuranPageData = await getPageData(pageId);
       const loadedFont = await loadFont(pageId);
 
@@ -50,16 +53,12 @@ const QuranPage = ({ pageId, playSound, stopCurrentSound }: QuranPageProps) => {
         loadedFont: loadedFont || '',
         wordFontSize,
         isDarkMode,
+        isPortrait,
       });
       setHtmlContent(pageHtml);
-      setIsLoadingContent(false);
     };
     loadPage();
-  }, [pageId, wordFontSize, isDarkMode]);
-
-  if (isLoadingContent) {
-    return null;
-  }
+  }, [pageId, wordFontSize, isDarkMode, isPortrait]);
 
   return (
     <>
@@ -80,7 +79,7 @@ const QuranPage = ({ pageId, playSound, stopCurrentSound }: QuranPageProps) => {
           style={styles.progressBar}
         />
       )}
-      <View style={styles.pageParent}>
+      <View style={[styles.pageParent, { width }]}>
         <WebView
           ref={webViewRef}
           originWhitelist={['*']}

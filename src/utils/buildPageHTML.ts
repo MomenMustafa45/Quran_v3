@@ -6,6 +6,7 @@ type BuildPageHTMLParamTypes = {
   loadedFont: string;
   wordFontSize: number;
   isDarkMode: boolean;
+  isPortrait?: boolean;
 };
 
 export const buildPageHTML = ({
@@ -13,6 +14,7 @@ export const buildPageHTML = ({
   loadedFont,
   wordFontSize,
   isDarkMode,
+  isPortrait,
 }: BuildPageHTMLParamTypes) => {
   return `
     <html lang="ar">
@@ -44,9 +46,10 @@ export const buildPageHTML = ({
             flex-direction: column;
             justify-content: flex-start;
             font-family: 'UthmaniHafs';
-            flex: 1;
+            height: 100%;
             padding:0 2vw;
             background-color:tansparent;
+            overflow: scroll;
  }
           .line {
             display: flex;
@@ -54,7 +57,7 @@ export const buildPageHTML = ({
             align-items: center;
             width: 100%;
             white-space: nowrap;
-            height:6.5vh;
+            height:6.5${isPortrait ? 'vh' : 'vw'};
           }
           .line.center {
             justify-content: center;
@@ -72,11 +75,12 @@ export const buildPageHTML = ({
             display: flex;
             width: 100%;
             white-space: nowrap;
-            height:6.5vh;
+            height:6.5${isPortrait ? 'vh' : 'vw'};
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            // overflow: hidden;
             color:${isDarkMode ? COLORS.whiteGray : COLORS.dark};
+            margin: ${isPortrait ? '0' : '40px'} 0;
             }
         </style>
       </head>
