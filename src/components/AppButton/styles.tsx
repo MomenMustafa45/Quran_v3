@@ -1,10 +1,5 @@
 import { StyleSheet } from 'react-native';
-import {
-  fontSizes,
-  paddings,
-  radius,
-  shadowStyle,
-} from '../../constants/desingSystem';
+import { fontSizes, paddings, radius } from '../../constants/desingSystem';
 import { COLORS } from '../../constants/colors';
 
 export const styles = StyleSheet.create({
@@ -15,7 +10,6 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.mutedOlive,
     justifyContent: 'center',
     flex: 1,
-    ...shadowStyle,
   },
   title: {
     color: COLORS.lightCream,

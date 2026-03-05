@@ -14,6 +14,7 @@ import SettingsModal from '../../components/modals/SettingsModal/SettingsModal';
 import useHomeInitialActions from './hooks/useHomeInitialActions';
 import { useAppSelector } from '../../store/hooks/storeHooks';
 import { COLORS } from '../../constants/colors';
+import LandScapeBtns from './components/LandScapeBtns/LandScapeBtns';
 
 const isRtl = I18nManager.isRTL;
 
@@ -29,6 +30,8 @@ const QuranHome = () => {
     getCurrentPageIndex,
     scrollToIndex,
     stopCurrentSound,
+    scrollToNextPage,
+    scrollToPrevPage,
   } = useQuranHomeActions();
 
   // home modal handlers and actions
@@ -73,7 +76,18 @@ const QuranHome = () => {
         { backgroundColor: isDarkMode ? COLORS.dark : COLORS.whiteGray },
       ]}
     >
-      <Header juzs={juzs} suras={suras} showModal={showModal} />
+      <Header
+        juzs={juzs}
+        suras={suras}
+        showModal={showModal}
+        isLandscape={!isPortrait}
+      />
+      {!isPortrait && (
+        <LandScapeBtns
+          scrollToPrevPage={scrollToPrevPage}
+          scrollToNextPage={scrollToNextPage}
+        />
+      )}
 
       <FlatList
         key={width}
@@ -97,6 +111,9 @@ const QuranHome = () => {
         windowSize={3}
         inverted={!isRtl}
         removeClippedSubviews={true}
+        decelerationRate="fast"
+        snapToAlignment="start"
+        scrollEnabled={isPortrait}
       />
 
       <PageModal

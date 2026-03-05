@@ -57,7 +57,7 @@ export const buildPageHTML = ({
             align-items: center;
             width: 100%;
             white-space: nowrap;
-            height:6.5${isPortrait ? 'vh' : 'vw'};
+            height:${isPortrait ? '6.5vh' : '8.5vw'};
           }
           .line.center {
             justify-content: center;

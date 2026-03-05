@@ -21,7 +21,6 @@ export const loadFont = async (pageNumber: number) => {
         const assetPath = `fonts/${formatPageId(pageNumber)}.ttf`;
         await RNFS.copyFileAssets(assetPath, destPath);
         fontBase64 = await RNFS.readFile(destPath, 'base64');
-        console.log('fontBase64', fontBase64);
       } catch (err) {
         console.error('Error copying font from assets:', err);
       }
@@ -29,7 +28,6 @@ export const loadFont = async (pageNumber: number) => {
       // iOS can read directly from MainBundlePath
       const fontPath = `${RNFS.MainBundlePath}/${formatPageId(pageNumber)}.ttf`;
 
-      console.log('fontPath sdsd', fontPath);
       fontBase64 = await RNFS.readFile(fontPath, 'base64');
     }
 

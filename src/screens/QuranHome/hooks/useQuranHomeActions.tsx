@@ -1,25 +1,28 @@
 import { useCallback, useRef } from 'react';
 import {
-  Dimensions,
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  useWindowDimensions,
 } from 'react-native';
 import Sound from 'react-native-sound';
 import Toast from 'react-native-toast-message';
-import { useAppDispatch } from '../../../store/hooks/storeHooks';
+import {
+  useAppDispatch,
+  useAppSelector,
+} from '../../../store/hooks/storeHooks';
 import { setCurrentPage } from '../../../store/slices/pageSlice';
 import { setItem } from '../../../../storage';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
 import { getRTLPageNumber } from '../../../utils/getRLTPageNumber';
-
-const { width } = Dimensions.get('window');
 
 const useQuranHomeActions = () => {
   const flatListRef = useRef<FlatList<number>>(null);
   const currentSoundRef = useRef<Sound | null>(null);
   const stopCallbackRef = useRef<(() => void) | null>(null);
   const dispatch = useAppDispatch();
+  const { width } = useWindowDimensions();
+  const currentPage = useAppSelector(state => state.page.currentPage);
 
   /** Stop any currently playing sound + clear highlight */
   const stopCurrentSound = () => {
@@ -83,7 +86,7 @@ const useQuranHomeActions = () => {
       dispatch(setCurrentPage(currentPageNumber));
       setItem(STORAGE_KEYS.CURRENT_PAGE, currentPageNumber);
     },
-    [dispatch],
+    [dispatch, width],
   );
 
   const scrollToIndex = useCallback(
@@ -96,8 +99,22 @@ const useQuranHomeActions = () => {
 
       flatListRef.current?.scrollToOffset({ offset, animated: false });
     },
-    [dispatch],
+    [dispatch, width],
   );
+
+  const scrollToNextPage = useCallback(() => {
+    if (!flatListRef.current) return;
+
+    scrollToIndex(currentPage + 1);
+  }, [currentPage, scrollToIndex]);
+
+  const scrollToPrevPage = useCallback(() => {
+    if (!flatListRef.current) return;
+
+    if (currentPage > 1) {
+      scrollToIndex(currentPage - 1);
+    }
+  }, [currentPage, scrollToIndex]);
 
   return {
     flatListRef,
@@ -105,6 +122,9 @@ const useQuranHomeActions = () => {
     stopCurrentSound,
     getCurrentPageIndex,
     scrollToIndex,
+
+    scrollToNextPage,
+    scrollToPrevPage,
   };
 };
 
