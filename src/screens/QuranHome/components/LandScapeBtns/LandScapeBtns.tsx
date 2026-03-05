@@ -18,13 +18,13 @@ const LandScapeBtns = ({
         style={[styles.landScapeBtn, styles.landScapeBtnNext]}
         onPress={scrollToPrevPage}
       >
-        <AppIcon name="arrow-right" type="FontAwesome5" size={iconSizes.xs} />
+        <AppIcon name="arrow-right" type="FontAwesome5" size={iconSizes.md} />
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.landScapeBtn, styles.landScapeBtnPrev]}
         onPress={scrollToNextPage}
       >
-        <AppIcon name="arrow-left" type="FontAwesome5" size={iconSizes.xs} />
+        <AppIcon name="arrow-left" type="FontAwesome5" size={iconSizes.md} />
       </TouchableOpacity>
     </>
   );

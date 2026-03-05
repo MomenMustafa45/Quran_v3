@@ -61,7 +61,7 @@ const QuranPage = ({
   }, [pageId, wordFontSize, isDarkMode, isPortrait]);
 
   return (
-    <>
+    <View>
       {downloadProgress > 0 && downloadProgress < 100 && (
         <Progress.Bar
           progress={downloadProgress / 100}
@@ -76,7 +76,7 @@ const QuranPage = ({
               {Math.round(downloadProgress)}%
             </AppText>
           }
-          style={styles.progressBar}
+          style={{ width }}
         />
       )}
       <View style={[styles.pageParent, { width }]}>
@@ -96,7 +96,7 @@ const QuranPage = ({
           androidLayerType="hardware"
         />
       </View>
-    </>
+    </View>
   );
 };
 

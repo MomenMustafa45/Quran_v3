@@ -1,5 +1,5 @@
-import { View, FlatList, I18nManager, useWindowDimensions } from 'react-native';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { View, FlatList, I18nManager, TouchableOpacity } from 'react-native';
+import React, { useCallback, useEffect } from 'react';
 import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
 import useQuranHomeActions from './hooks/useQuranHomeActions';
@@ -14,15 +14,14 @@ import SettingsModal from '../../components/modals/SettingsModal/SettingsModal';
 import useHomeInitialActions from './hooks/useHomeInitialActions';
 import { useAppSelector } from '../../store/hooks/storeHooks';
 import { COLORS } from '../../constants/colors';
-import LandScapeBtns from './components/LandScapeBtns/LandScapeBtns';
+import AppIcon from '../../components/AppIcon/AppIcon';
+import { iconSizes } from '../../constants/desingSystem';
 
 const isRtl = I18nManager.isRTL;
 
 const QuranHome = () => {
   const isDarkMode = useAppSelector(state => state.page.isDarkMode);
-  const { width, height } = useWindowDimensions();
 
-  const isPortrait = useMemo(() => height >= width, [height, width]);
   // sounds actions and words press functions
   const {
     flatListRef,
@@ -32,6 +31,8 @@ const QuranHome = () => {
     stopCurrentSound,
     scrollToNextPage,
     scrollToPrevPage,
+    contentWidth,
+    isPortrait,
   } = useQuranHomeActions();
 
   // home modal handlers and actions
@@ -50,17 +51,15 @@ const QuranHome = () => {
 
   const renderItem = useCallback(
     ({ item }: { item: number }) => (
-      <View style={[styles.pageItem, { width }]}>
-        <QuranPage
-          pageId={item}
-          playSound={playSound}
-          stopCurrentSound={stopCurrentSound}
-          isPortrait={isPortrait}
-          width={width}
-        />
-      </View>
+      <QuranPage
+        pageId={item}
+        playSound={playSound}
+        stopCurrentSound={stopCurrentSound}
+        isPortrait={isPortrait}
+        width={contentWidth}
+      />
     ),
-    [playSound, stopCurrentSound, width, isPortrait],
+    [playSound, stopCurrentSound, contentWidth, isPortrait],
   );
 
   useEffect(() => {
@@ -82,39 +81,58 @@ const QuranHome = () => {
         showModal={showModal}
         isLandscape={!isPortrait}
       />
-      {!isPortrait && (
-        <LandScapeBtns
-          scrollToPrevPage={scrollToPrevPage}
-          scrollToNextPage={scrollToNextPage}
-        />
-      )}
 
-      <FlatList
-        key={width}
-        ref={flatListRef}
-        data={Array.from({ length: 604 }, (_, i) => i + 1)}
-        initialScrollIndex={initialPage}
-        keyExtractor={item => `page-${item}`}
-        renderItem={renderItem}
-        onMomentumScrollEnd={getCurrentPageIndex}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        maxToRenderPerBatch={4}
-        initialNumToRender={4}
-        updateCellsBatchingPeriod={4}
-        getItemLayout={(_, index) => ({
-          length: width,
-          offset: width * index,
-          index,
-        })}
-        windowSize={3}
-        inverted={!isRtl}
-        removeClippedSubviews={true}
-        decelerationRate="fast"
-        snapToAlignment="start"
-        scrollEnabled={isPortrait}
-      />
+      <View style={styles.screenContainer}>
+        {!isPortrait && (
+          <TouchableOpacity
+            style={styles.landScapeBtn}
+            onPress={scrollToPrevPage}
+          >
+            <AppIcon
+              name="arrow-right"
+              type="FontAwesome5"
+              size={iconSizes.sm}
+            />
+          </TouchableOpacity>
+        )}
+
+        <FlatList
+          key={contentWidth}
+          ref={flatListRef}
+          data={Array.from({ length: 604 }, (_, i) => i + 1)}
+          initialScrollIndex={initialPage}
+          keyExtractor={item => `page-${item}`}
+          renderItem={renderItem}
+          onMomentumScrollEnd={getCurrentPageIndex}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          maxToRenderPerBatch={4}
+          initialNumToRender={4}
+          updateCellsBatchingPeriod={4}
+          getItemLayout={(_, index) => ({
+            length: contentWidth,
+            offset: contentWidth * index,
+            index,
+          })}
+          windowSize={3}
+          inverted={!isRtl}
+          removeClippedSubviews={true}
+          scrollEnabled={isPortrait}
+        />
+        {!isPortrait && (
+          <TouchableOpacity
+            style={styles.landScapeBtn}
+            onPress={scrollToNextPage}
+          >
+            <AppIcon
+              name="arrow-left"
+              type="FontAwesome5"
+              size={iconSizes.sm}
+            />
+          </TouchableOpacity>
+        )}
+      </View>
 
       <PageModal
         visible={pageModal}

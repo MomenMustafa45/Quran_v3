@@ -29,7 +29,7 @@ export const styles = StyleSheet.create({
     padding: paddings.md,
   },
   title: {
-    fontSize: fontSizes.xl,
+    fontSize: fontSizes.md,
     fontWeight: '800',
     color: COLORS.lightCream,
   },

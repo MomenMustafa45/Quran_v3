@@ -1,7 +1,7 @@
 import { Dimensions, I18nManager } from 'react-native';
 
-export const widthRatio = Dimensions.get('window').width / 360;
-export const heightRatio = Dimensions.get('window').height / 800;
+export const widthRatio = Dimensions.get('window').width / 375;
+export const heightRatio = Dimensions.get('window').height / 812;
 const isRTL = I18nManager.isRTL;
 
 // Border widths
@@ -168,3 +168,5 @@ export const shadowStyle = {
   shadowRadius: 24,
   elevation: 8,
 };
+
+export const landScapeBtnWidth = 30;

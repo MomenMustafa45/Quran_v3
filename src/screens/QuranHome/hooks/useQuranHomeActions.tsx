@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import {
   FlatList,
   NativeScrollEvent,
@@ -15,13 +15,24 @@ import { setCurrentPage } from '../../../store/slices/pageSlice';
 import { setItem } from '../../../../storage';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
 import { getRTLPageNumber } from '../../../utils/getRLTPageNumber';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { landScapeBtnWidth } from '../../../constants/desingSystem';
 
 const useQuranHomeActions = () => {
   const flatListRef = useRef<FlatList<number>>(null);
   const currentSoundRef = useRef<Sound | null>(null);
   const stopCallbackRef = useRef<(() => void) | null>(null);
   const dispatch = useAppDispatch();
-  const { width } = useWindowDimensions();
+
+  // get screen dimensions
+  const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const safeWidth = width - insets.left - insets.right;
+  const isPortrait = useMemo(() => height >= width, [height, width]);
+
+  const contentWidth = isPortrait
+    ? safeWidth
+    : safeWidth - landScapeBtnWidth * 2;
   const currentPage = useAppSelector(state => state.page.currentPage);
 
   /** Stop any currently playing sound + clear highlight */
@@ -80,26 +91,26 @@ const useQuranHomeActions = () => {
   const getCurrentPageIndex = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const offsetX = event.nativeEvent.contentOffset.x;
-      const currentIndex = Math.round(offsetX / width);
+      const currentIndex = Math.round(offsetX / contentWidth);
       const currentPageNumber = getRTLPageNumber(currentIndex);
 
       dispatch(setCurrentPage(currentPageNumber));
       setItem(STORAGE_KEYS.CURRENT_PAGE, currentPageNumber);
     },
-    [dispatch, width],
+    [dispatch, contentWidth],
   );
 
   const scrollToIndex = useCallback(
     (pageNumber: number) => {
       if (!flatListRef.current) return;
 
-      const offset = (pageNumber - 1) * width;
+      const offset = (pageNumber - 1) * contentWidth;
       dispatch(setCurrentPage(pageNumber));
       setItem(STORAGE_KEYS.CURRENT_PAGE, pageNumber);
 
       flatListRef.current?.scrollToOffset({ offset, animated: false });
     },
-    [dispatch, width],
+    [dispatch, contentWidth],
   );
 
   const scrollToNextPage = useCallback(() => {
@@ -125,6 +136,9 @@ const useQuranHomeActions = () => {
 
     scrollToNextPage,
     scrollToPrevPage,
+
+    isPortrait,
+    contentWidth,
   };
 };
 

@@ -38,6 +38,13 @@ export default function AppModal({
       transparent
       animationType={animationType}
       onRequestClose={onClose}
+      supportedOrientations={[
+        'portrait',
+        'landscape',
+        'portrait-upside-down',
+        'landscape-left',
+        'landscape-right',
+      ]}
     >
       <View style={styles.backdrop}>
         {/* Backdrop press */}
@@ -53,7 +60,7 @@ export default function AppModal({
               <AppIcon
                 name="close"
                 type="Ionicons"
-                size={iconSizes['2xl']}
+                size={iconSizes['md']}
                 color={COLORS.lightCream}
               />
             </TouchableOpacity>

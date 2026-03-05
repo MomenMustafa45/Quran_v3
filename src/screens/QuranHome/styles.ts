@@ -1,4 +1,8 @@
 import { StyleSheet } from 'react-native';
+import {
+  flexDirectionRow,
+  landScapeBtnWidth,
+} from '../../constants/desingSystem';
 
 export const styles = StyleSheet.create({
   pageParent: {
@@ -7,5 +11,14 @@ export const styles = StyleSheet.create({
   },
   pageItem: {
     flex: 1,
+  },
+  screenContainer: {
+    flex: 1,
+    flexDirection: flexDirectionRow,
+  },
+  landScapeBtn: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: landScapeBtnWidth,
   },
 });
