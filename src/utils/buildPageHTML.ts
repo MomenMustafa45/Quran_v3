@@ -47,7 +47,7 @@ export const buildPageHTML = ({
             justify-content: flex-start;
             font-family: 'UthmaniHafs';
             height: 100%;
-            padding:0 1vw;
+            padding:0 1.5vw;
             background-color:tansparent;
             overflow: scroll;
  }
