@@ -43,14 +43,21 @@ const useHomeInitialActions = () => {
 
   useLayoutEffect(() => {
     const init = async () => {
-      const [surasData, juzsData] = await Promise.all([getSuras(), getJuzs()]);
-      setSuras(surasData);
-      setJuzs(juzsData);
+      try {
+        const [surasData, juzsData] = await Promise.all([
+          getSuras(),
+          getJuzs(),
+        ]);
+        setSuras(surasData);
+        setJuzs(juzsData);
 
-      getSavedPaged();
-      getSavedPageSettings();
+        getSavedPaged();
+        getSavedPageSettings();
 
-      await BootSplash.hide({ fade: true });
+        await BootSplash.hide({ fade: true });
+      } catch (error) {
+        console.log('🚀 ~ init ~ error:', error);
+      }
     };
     init();
   }, [dispatch, getSavedPaged, getSavedPageSettings]);

@@ -75,7 +75,7 @@ export const downloadPageAudios = async (
             onProgress?.(0);
             return;
           }
-          await new Promise(res =>
+          await new Promise((res: any) =>
             setTimeout(res, 1000 * Math.pow(2, attempt)),
           );
         }
