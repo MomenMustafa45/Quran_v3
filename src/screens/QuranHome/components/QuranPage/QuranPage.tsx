@@ -94,6 +94,8 @@ const QuranPage = ({
           }}
           setSupportMultipleWindows={false}
           androidLayerType="hardware"
+          showsVerticalScrollIndicator={false} // hide vertical scrollbar
+          showsHorizontalScrollIndicator={false}
         />
       </View>
     </View>
