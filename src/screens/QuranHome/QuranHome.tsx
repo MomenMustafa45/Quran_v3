@@ -1,4 +1,4 @@
-import { View, FlatList, I18nManager, TouchableOpacity } from 'react-native';
+import { View, FlatList, I18nManager } from 'react-native';
 import React, { useCallback } from 'react';
 import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
@@ -14,8 +14,7 @@ import SettingsModal from '../../components/modals/SettingsModal/SettingsModal';
 import useHomeInitialActions from './hooks/useHomeInitialActions';
 import { useAppSelector } from '../../store/hooks/storeHooks';
 import { COLORS } from '../../constants/colors';
-import AppIcon from '../../components/AppIcon/AppIcon';
-import { iconSizes } from '../../constants/desingSystem';
+import LandScapeBtn from './components/LandScapeBtn/LandScapeBtn';
 
 const isRtl = I18nManager.isRTL;
 
@@ -29,8 +28,6 @@ const QuranHome = () => {
     getCurrentPageIndex,
     scrollToIndex,
     stopCurrentSound,
-    scrollToNextPage,
-    scrollToPrevPage,
     contentWidth,
     isPortrait,
   } = useQuranHomeActions();
@@ -80,19 +77,11 @@ const QuranHome = () => {
 
       <View style={styles.screenContainer}>
         {!isPortrait && (
-          <TouchableOpacity
-            style={styles.landScapeBtn}
-            onPress={scrollToPrevPage}
-          >
-            <AppIcon
-              name="arrow-right"
-              type="FontAwesome5"
-              size={iconSizes.sm}
-            />
-          </TouchableOpacity>
+          <LandScapeBtn scrollToIndex={scrollToIndex} direction="prev" />
         )}
 
         <FlatList
+          key={contentWidth}
           ref={flatListRef}
           data={Array.from({ length: 604 }, (_, i) => i + 1)}
           keyExtractor={item => `page-${item}`}
@@ -115,16 +104,7 @@ const QuranHome = () => {
           scrollEnabled={isPortrait}
         />
         {!isPortrait && (
-          <TouchableOpacity
-            style={styles.landScapeBtn}
-            onPress={scrollToNextPage}
-          >
-            <AppIcon
-              name="arrow-left"
-              type="FontAwesome5"
-              size={iconSizes.sm}
-            />
-          </TouchableOpacity>
+          <LandScapeBtn scrollToIndex={scrollToIndex} direction="next" />
         )}
       </View>
 

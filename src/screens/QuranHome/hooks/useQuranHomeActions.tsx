@@ -7,10 +7,7 @@ import {
 } from 'react-native';
 import Sound from 'react-native-sound';
 import Toast from 'react-native-toast-message';
-import {
-  useAppDispatch,
-  useAppSelector,
-} from '../../../store/hooks/storeHooks';
+import { useAppDispatch } from '../../../store/hooks/storeHooks';
 import { setCurrentPage } from '../../../store/slices/pageSlice';
 import { setItem } from '../../../../storage';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
@@ -33,7 +30,6 @@ const useQuranHomeActions = () => {
   const contentWidth = isPortrait
     ? safeWidth
     : safeWidth - landScapeBtnWidth * 2;
-  const currentPage = useAppSelector(state => state.page.currentPage);
 
   /** Stop any currently playing sound + clear highlight */
   const stopCurrentSound = () => {
@@ -88,16 +84,23 @@ const useQuranHomeActions = () => {
     [],
   );
 
+  const currentPageSetter = useCallback(
+    (pageNumber: number) => {
+      dispatch(setCurrentPage(pageNumber));
+      setItem(STORAGE_KEYS.CURRENT_PAGE, pageNumber);
+    },
+    [dispatch],
+  );
+
   const getCurrentPageIndex = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const offsetX = event.nativeEvent.contentOffset.x;
       const currentIndex = Math.round(offsetX / contentWidth);
       const currentPageNumber = getRTLPageNumber(currentIndex);
 
-      dispatch(setCurrentPage(currentPageNumber));
-      setItem(STORAGE_KEYS.CURRENT_PAGE, currentPageNumber);
+      currentPageSetter(currentPageNumber);
     },
-    [dispatch, contentWidth],
+    [currentPageSetter, contentWidth],
   );
 
   const scrollToIndex = useCallback(
@@ -105,26 +108,12 @@ const useQuranHomeActions = () => {
       if (!flatListRef.current) return;
 
       const offset = (pageNumber - 1) * contentWidth;
-      dispatch(setCurrentPage(pageNumber));
+      currentPageSetter(pageNumber);
 
       flatListRef.current?.scrollToOffset({ offset, animated: false });
     },
-    [dispatch, contentWidth],
+    [currentPageSetter, contentWidth],
   );
-
-  const scrollToNextPage = useCallback(() => {
-    if (!flatListRef.current) return;
-
-    scrollToIndex(currentPage + 1);
-  }, [currentPage, scrollToIndex]);
-
-  const scrollToPrevPage = useCallback(() => {
-    if (!flatListRef.current) return;
-
-    if (currentPage > 1) {
-      scrollToIndex(currentPage - 1);
-    }
-  }, [currentPage, scrollToIndex]);
 
   return {
     flatListRef,
@@ -132,13 +121,8 @@ const useQuranHomeActions = () => {
     stopCurrentSound,
     getCurrentPageIndex,
     scrollToIndex,
-
-    scrollToNextPage,
-    scrollToPrevPage,
-
     isPortrait,
     contentWidth,
-    currentPage,
   };
 };
 
