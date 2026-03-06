@@ -15,8 +15,6 @@ export const loadFont = async (pageNumber: number) => {
         pageNumber,
       )}.ttf`;
 
-      console.log('destPath', destPath);
-
       try {
         const assetPath = `fonts/${formatPageId(pageNumber)}.ttf`;
         await RNFS.copyFileAssets(assetPath, destPath);

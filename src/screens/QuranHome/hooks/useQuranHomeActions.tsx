@@ -106,7 +106,6 @@ const useQuranHomeActions = () => {
 
       const offset = (pageNumber - 1) * contentWidth;
       dispatch(setCurrentPage(pageNumber));
-      setItem(STORAGE_KEYS.CURRENT_PAGE, pageNumber);
 
       flatListRef.current?.scrollToOffset({ offset, animated: false });
     },
@@ -139,6 +138,7 @@ const useQuranHomeActions = () => {
 
     isPortrait,
     contentWidth,
+    currentPage,
   };
 };
 

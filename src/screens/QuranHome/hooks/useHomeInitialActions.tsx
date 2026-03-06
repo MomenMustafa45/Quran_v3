@@ -1,8 +1,7 @@
-import { useCallback, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
 import { getItem } from '../../../../storage';
 import {
-  setCurrentPage,
   setIsDarkMode,
   setWordFontSize,
 } from '../../../store/slices/pageSlice';
@@ -13,8 +12,13 @@ import BootSplash from 'react-native-bootsplash';
 import { getSuras } from '../../../database/getSuras';
 import { getJuzs } from '../../../database/getJuzs';
 
-const useHomeInitialActions = () => {
-  const [initialPage, setInitialPage] = useState<number | null>(null);
+type UseHomeInitialActionsProps = {
+  scrollToIndex: (pageNumber: number) => void;
+};
+
+const useHomeInitialActions = ({
+  scrollToIndex,
+}: UseHomeInitialActionsProps) => {
   const [suras, setSuras] = useState<QuranSuraType[]>([]);
   const [juzs, setJuzs] = useState<QuranJuzType[]>([]);
 
@@ -22,13 +26,8 @@ const useHomeInitialActions = () => {
 
   const getSavedPaged = useCallback(() => {
     const savedPage = getItem(STORAGE_KEYS.CURRENT_PAGE);
-    if (savedPage) {
-      dispatch(setCurrentPage(Number(savedPage)));
-      setInitialPage(Number(savedPage) - 1);
-    } else {
-      setInitialPage(0);
-    }
-  }, [dispatch]);
+    scrollToIndex(Number(savedPage) || 1);
+  }, [scrollToIndex]);
 
   const getSavedPageSettings = useCallback(() => {
     const fontSizeWord = getItem(STORAGE_KEYS.WORD_FONT_SIZE);
@@ -43,6 +42,8 @@ const useHomeInitialActions = () => {
 
   useLayoutEffect(() => {
     const init = async () => {
+      console.log('init working from here');
+
       try {
         const [surasData, juzsData] = await Promise.all([
           getSuras(),
@@ -51,7 +52,6 @@ const useHomeInitialActions = () => {
         setSuras(surasData);
         setJuzs(juzsData);
 
-        getSavedPaged();
         getSavedPageSettings();
 
         await BootSplash.hide({ fade: true });
@@ -60,9 +60,13 @@ const useHomeInitialActions = () => {
       }
     };
     init();
-  }, [dispatch, getSavedPaged, getSavedPageSettings]);
+  }, [dispatch, getSavedPageSettings]);
 
-  return { initialPage, suras, juzs };
+  useEffect(() => {
+    getSavedPaged();
+  }, [getSavedPaged]);
+
+  return { suras, juzs };
 };
 
 export default useHomeInitialActions;

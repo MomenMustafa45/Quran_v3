@@ -1,5 +1,5 @@
 import { View, FlatList, I18nManager, TouchableOpacity } from 'react-native';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
 import useQuranHomeActions from './hooks/useQuranHomeActions';
@@ -47,7 +47,9 @@ const QuranHome = () => {
   } = useQuranModals();
 
   // here actions for initail render of app
-  const { initialPage, juzs, suras } = useHomeInitialActions();
+  const { juzs, suras } = useHomeInitialActions({
+    scrollToIndex,
+  });
 
   const renderItem = useCallback(
     ({ item }: { item: number }) => (
@@ -61,12 +63,6 @@ const QuranHome = () => {
     ),
     [playSound, stopCurrentSound, contentWidth, isPortrait],
   );
-
-  useEffect(() => {
-    if (flatListRef.current && initialPage && initialPage > 0) {
-      scrollToIndex(initialPage);
-    }
-  }, [flatListRef, initialPage, scrollToIndex]);
 
   return (
     <View
@@ -99,7 +95,6 @@ const QuranHome = () => {
         <FlatList
           ref={flatListRef}
           data={Array.from({ length: 604 }, (_, i) => i + 1)}
-          initialScrollIndex={initialPage}
           keyExtractor={item => `page-${item}`}
           renderItem={renderItem}
           onMomentumScrollEnd={getCurrentPageIndex}
