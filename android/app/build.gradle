@@ -84,8 +84,8 @@ android {
         applicationId "com.forsa_quran"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 18
-        versionName "2.1.0"
+        versionCode 20
+        versionName "2.3.0"
     }
     signingConfigs {
          release {
