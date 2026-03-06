@@ -97,7 +97,6 @@ const QuranHome = () => {
         )}
 
         <FlatList
-          key={contentWidth}
           ref={flatListRef}
           data={Array.from({ length: 604 }, (_, i) => i + 1)}
           initialScrollIndex={initialPage}
