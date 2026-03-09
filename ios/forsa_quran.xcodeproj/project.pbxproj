@@ -616,10 +616,10 @@
 		2F6E62EE2EFDA98E00FB2677 /* 404.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2F6E5FCA2EFDA98E00FB2677 /* 404.ttf */; };
 		2F7486862E8BF3F8007FFED9 /* Uthmanic-HAFS.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2F7486852E8BF3F8007FFED9 /* Uthmanic-HAFS.otf */; };
 		2F7486872E8BF3F8007FFED9 /* KSARegular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2F7486842E8BF3F8007FFED9 /* KSARegular.ttf */; };
-		2FAE38F62EFEB12300931CCD /* quran_arabic2.db in Resources */ = {isa = PBXBuildFile; fileRef = 2FAE38F52EFEB12300931CCD /* quran_arabic2.db */; };
 		2FC1EAA42E89B8F30014C227 /* GRDBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FC1EAA32E89B8F30014C227 /* GRDBManager.swift */; };
 		2FC1EAA72E89B9430014C227 /* GRDBManagerBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 2FC1EAA62E89B9430014C227 /* GRDBManagerBridge.m */; };
 		52A76FDA74D941E5A5D7508C /* UthmanTN_v2-0.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E8D3C80761904CB999036D72 /* UthmanTN_v2-0.ttf */; };
+		632273352F5EB35600431E7C /* quran_arabic2.db in Resources */ = {isa = PBXBuildFile; fileRef = 632273342F5EB35600431E7C /* quran_arabic2.db */; };
 		632A59CD3C0844108DE10D03 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD24E36BB6244C1AA2DFCA3A /* BootSplash.storyboard */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
@@ -1238,7 +1238,6 @@
 		2F6E60922EFDA98E00FB2677 /* 604.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = 604.ttf; sourceTree = "<group>"; };
 		2F7486842E8BF3F8007FFED9 /* KSARegular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = KSARegular.ttf; sourceTree = "<group>"; };
 		2F7486852E8BF3F8007FFED9 /* Uthmanic-HAFS.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Uthmanic-HAFS.otf"; sourceTree = "<group>"; };
-		2FAE38F52EFEB12300931CCD /* quran_arabic2.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = quran_arabic2.db; sourceTree = "<group>"; };
 		2FC1EAA32E89B8F30014C227 /* GRDBManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GRDBManager.swift; sourceTree = "<group>"; };
 		2FC1EAA52E89B9430014C227 /* forsa_quran-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "forsa_quran-Bridging-Header.h"; sourceTree = "<group>"; };
 		2FC1EAA62E89B9430014C227 /* GRDBManagerBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GRDBManagerBridge.m; sourceTree = "<group>"; };
@@ -1246,6 +1245,7 @@
 		51D9498C7AFA4C20A91AF063 /* Colors.xcassets */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; name = Colors.xcassets; path = forsa_quran/Colors.xcassets; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-forsa_quran.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-forsa_quran.release.xcconfig"; path = "Target Support Files/Pods-forsa_quran/Pods-forsa_quran.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-forsa_quran.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-forsa_quran.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		632273342F5EB35600431E7C /* quran_arabic2.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = quran_arabic2.db; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = forsa_quran/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = forsa_quran/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AD24E36BB6244C1AA2DFCA3A /* BootSplash.storyboard */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = BootSplash.storyboard; path = forsa_quran/BootSplash.storyboard; sourceTree = "<group>"; };
@@ -1911,7 +1911,7 @@
 		2FC1EA912E89AADE0014C227 /* res */ = {
 			isa = PBXGroup;
 			children = (
-				2FAE38F52EFEB12300931CCD /* quran_arabic2.db */,
+				632273342F5EB35600431E7C /* quran_arabic2.db */,
 			);
 			path = res;
 			sourceTree = "<group>";
@@ -2253,6 +2253,7 @@
 				2F6E61762EFDA98E00FB2677 /* 434.ttf in Resources */,
 				2F6E61772EFDA98E00FB2677 /* 399.ttf in Resources */,
 				2F6E61782EFDA98E00FB2677 /* 437.ttf in Resources */,
+				632273352F5EB35600431E7C /* quran_arabic2.db in Resources */,
 				2F6E61792EFDA98E00FB2677 /* 438.ttf in Resources */,
 				2F6E617A2EFDA98E00FB2677 /* 467.ttf in Resources */,
 				2F6E617B2EFDA98E00FB2677 /* 496.ttf in Resources */,
@@ -2440,7 +2441,6 @@
 				2F6E62312EFDA98E00FB2677 /* 558.ttf in Resources */,
 				2F6E62322EFDA98E00FB2677 /* 039.ttf in Resources */,
 				2F6E62332EFDA98E00FB2677 /* 152.ttf in Resources */,
-				2FAE38F62EFEB12300931CCD /* quran_arabic2.db in Resources */,
 				2F6E62342EFDA98E00FB2677 /* 163.ttf in Resources */,
 				2F6E62352EFDA98E00FB2677 /* 290.ttf in Resources */,
 				2F6E62362EFDA98E00FB2677 /* 195.ttf in Resources */,
