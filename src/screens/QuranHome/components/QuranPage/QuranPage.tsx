@@ -79,7 +79,7 @@ const QuranPage = ({
           style={{ width }}
         />
       )}
-      <View style={[styles.pageParent, { width }]}>
+      <View style={[styles.pageParent, { width, flex: 1 }]}>
         <WebView
           ref={webViewRef}
           originWhitelist={['*']}
@@ -94,7 +94,7 @@ const QuranPage = ({
           }}
           setSupportMultipleWindows={false}
           androidLayerType="hardware"
-          showsVerticalScrollIndicator={false} // hide vertical scrollbar
+          showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
         />
       </View>
