@@ -1,12 +1,11 @@
 import { View, FlatList, I18nManager } from 'react-native';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { styles } from './styles';
 import QuranPage from './components/QuranPage/QuranPage';
 import useQuranHomeActions from './hooks/useQuranHomeActions';
 import Header from './components/Header/Header';
-
 import PageModal from '../../components/modals/PageModal/PageModal';
-import useQuranModals from './hooks/useQuranModals';
+import useQuranModals, { QuranModalTypes } from './hooks/useQuranModals';
 import SurasModal from '../../components/modals/SurasModal/SurasModal';
 import JuzModal from '../../components/modals/JuzModal/JuzModal';
 import SearchModal from '../../components/modals/SearchModal/SearchModal';
@@ -15,13 +14,47 @@ import useHomeInitialActions from './hooks/useHomeInitialActions';
 import { useAppSelector } from '../../store/hooks/storeHooks';
 import { COLORS } from '../../constants/colors';
 import LandScapeBtn from './components/LandScapeBtn/LandScapeBtn';
+import { useNavigation } from '@react-navigation/native';
+import {
+  getAnalytics,
+  logEvent,
+  logScreenView,
+} from '@react-native-firebase/analytics';
+import {
+  getCrashlytics,
+  log,
+  setAttribute,
+} from '@react-native-firebase/crashlytics';
 
 const isRtl = I18nManager.isRTL;
+const analytics = getAnalytics();
+const crashlytics = getCrashlytics();
 
 const QuranHome = () => {
   const isDarkMode = useAppSelector(state => state.page.isDarkMode);
+  const navigation = useNavigation();
 
-  // sounds actions and words press functions
+  // Track screen view every time this screen is focused
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Analytics: marks this as the active screen
+      logScreenView(analytics, {
+        screen_name: 'QuranHomeScreen',
+        screen_class: 'QuranHome',
+      });
+      // Also log as an explicit event for funnel tracking
+      logEvent(analytics, 'screen_view', {
+        screen_name: 'QuranHomeScreen',
+        screen_class: 'QuranHome',
+      });
+      // Crashlytics context: if a crash happens, we know the user was here
+      log(crashlytics, 'QuranHome screen focused');
+      setAttribute(crashlytics, 'last_screen', 'QuranHome');
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
   const {
     flatListRef,
     playSound,
@@ -32,7 +65,6 @@ const QuranHome = () => {
     isPortrait,
   } = useQuranHomeActions();
 
-  // home modal handlers and actions
   const {
     pageModal,
     hideModal,
@@ -43,10 +75,30 @@ const QuranHome = () => {
     surasModal,
   } = useQuranModals();
 
-  // here actions for initail render of app
-  const { juzs, suras } = useHomeInitialActions({
-    scrollToIndex,
-  });
+  const { juzs, suras } = useHomeInitialActions({ scrollToIndex });
+
+  // Log which page the user navigated to
+  const handlePageChange = useCallback(
+    (e: any) => {
+      getCurrentPageIndex(e);
+      const pageIndex = Math.round(
+        e.nativeEvent.contentOffset.x / contentWidth,
+      );
+      const pageNumber = pageIndex + 1;
+      logEvent(analytics, 'quran_page_view', { page_number: pageNumber });
+      setAttribute(crashlytics, 'last_page_viewed', String(pageNumber));
+    },
+    [getCurrentPageIndex, contentWidth],
+  );
+
+  // Log which modal was opened
+  const handleShowModal = useCallback(
+    (modalName: QuranModalTypes) => {
+      showModal(modalName);
+      logEvent(analytics, 'modal_opened', { modal_name: modalName });
+    },
+    [showModal],
+  );
 
   const renderItem = useCallback(
     ({ item }: { item: number }) => (
@@ -71,7 +123,7 @@ const QuranHome = () => {
       <Header
         juzs={juzs}
         suras={suras}
-        showModal={showModal}
+        showModal={handleShowModal}
         isLandscape={!isPortrait}
       />
 
@@ -86,7 +138,7 @@ const QuranHome = () => {
           data={Array.from({ length: 604 }, (_, i) => i + 1)}
           keyExtractor={item => `page-${item}`}
           renderItem={renderItem}
-          onMomentumScrollEnd={getCurrentPageIndex}
+          onMomentumScrollEnd={handlePageChange}
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
@@ -103,6 +155,7 @@ const QuranHome = () => {
           removeClippedSubviews={true}
           scrollEnabled={isPortrait}
         />
+
         {!isPortrait && (
           <LandScapeBtn scrollToIndex={scrollToIndex} direction="next" />
         )}
@@ -113,7 +166,6 @@ const QuranHome = () => {
         onClose={hideModal}
         onSelectPage={scrollToIndex}
       />
-
       <SurasModal
         onClose={hideModal}
         onSelectPage={scrollToIndex}
@@ -126,13 +178,11 @@ const QuranHome = () => {
         juzs={juzs}
         visible={juzModal}
       />
-
       <SearchModal
         onClose={hideModal}
         onSelectPage={scrollToIndex}
         visible={searchModal}
       />
-
       <SettingsModal visible={settingsModal} onClose={hideModal} />
     </View>
   );
