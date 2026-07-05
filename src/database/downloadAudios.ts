@@ -10,7 +10,7 @@ import { getItem, setItem } from '../../storage';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 
 const TOTAL_QURAN_PAGES = 604;
-const CONCURRENCY_LIMIT = 3;
+const CONCURRENCY_LIMIT = 5;
 const MAX_RETRIES = 2;
 
 /**
@@ -67,7 +67,6 @@ async function downloadWithRetry(
       await downloadFile({
         fromUrl: url,
         toFile: dest,
-        progressDivider: 5,
       }).promise;
 
       onFileDone();

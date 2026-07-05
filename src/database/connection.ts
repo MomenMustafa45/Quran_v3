@@ -18,7 +18,15 @@ export async function executeQuery(query: string, parameters: any = {}) {
     iosParams[`param${index}`] = value;
   });
 
-  return GRDBManager.executeQuery(query, iosParams) as Promise<{ rows: any[] }>;
+  if (parameters['param0'] === null || parameters['param1'] === null) {
+    return { insertId: -1, rowsAffected: 0, rows: [] };
+  }
+
+  return GRDBManager.executeQuery(query, iosParams) as Promise<{
+    insertId: number;
+    rowsAffected: number;
+    rows: any[];
+  }>;
 }
 
 export function prepareParameters(parameters: any[]) {

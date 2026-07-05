@@ -20,7 +20,6 @@ export async function getPageData(pageId: number): Promise<PageDataResult> {
     `SELECT * FROM Lines WHERE page_id = ? ORDER BY line_number;`,
     parametersPageId,
   );
-  console.log('🚀 ~ getPageData ~ lineResult:', lineResult);
 
   if (lineResult.rows.length === 0) {
     return { surah: '', lines: [] };
@@ -38,22 +37,11 @@ export async function getPageData(pageId: number): Promise<PageDataResult> {
   // Prepare lines with words
   const lines = [];
   for (const line of lineResult.rows) {
-    console.log('line row:', JSON.stringify(line));
-    console.log(
-      'first_word_id:',
-      line.first_word_id,
-      'last_word_id:',
-      line.last_word_id,
-    );
-
-    if (line.first_word_id === null || line.last_word_id === null) {
-      continue;
-    }
-
     const parametersLineWords = prepareParameters([
       line.first_word_id,
       line.last_word_id,
     ]);
+
     // Get words for this line
     const wordResult = await executeQuery(
       `SELECT * FROM Words

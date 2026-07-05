@@ -15,11 +15,7 @@ import { useAppSelector } from '../../store/hooks/storeHooks';
 import { COLORS } from '../../constants/colors';
 import LandScapeBtn from './components/LandScapeBtn/LandScapeBtn';
 import { useNavigation } from '@react-navigation/native';
-import {
-  getAnalytics,
-  logEvent,
-  logScreenView,
-} from '@react-native-firebase/analytics';
+import { getAnalytics, logEvent } from '@react-native-firebase/analytics';
 import {
   getCrashlytics,
   log,
@@ -37,11 +33,6 @@ const QuranHome = () => {
   // Track screen view every time this screen is focused
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      // Analytics: marks this as the active screen
-      logScreenView(analytics, {
-        screen_name: 'QuranHomeScreen',
-        screen_class: 'QuranHome',
-      });
       // Also log as an explicit event for funnel tracking
       logEvent(analytics, 'screen_view', {
         screen_name: 'QuranHomeScreen',

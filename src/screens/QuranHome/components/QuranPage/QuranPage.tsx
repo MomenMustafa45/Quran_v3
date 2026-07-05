@@ -84,6 +84,7 @@ const QuranPage = ({
         />
       )}
       <View style={[styles.pageParent, { width, flex: 1 }]}>
+        {/* @ts-ignore */}
         <WebView
           ref={webViewRef}
           originWhitelist={['*']}
