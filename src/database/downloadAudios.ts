@@ -73,7 +73,6 @@ async function downloadWithRetry(
       return true;
     } catch (err) {
       const isLastAttempt = attempt === retries - 1;
-      console.log(`retrying (${attempt + 1}/${retries})`, url);
 
       if (isLastAttempt) {
         const errorMessage =
