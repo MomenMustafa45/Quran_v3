@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@dr.pogodin/react-native-fs": "^2.39.2",
     "@react-native-community/slider": "^5.0.1",
     "@react-native-firebase/analytics": "^25.1.0",
     "@react-native-firebase/app": "^25.1.0",
@@ -24,7 +25,6 @@
     "react": "19.2.0",
     "react-native": "^0.83.2",
     "react-native-bootsplash": "^6.3.10",
-    "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.30.0",
     "react-native-google-mobile-ads": "^15.7.0",
     "react-native-mmkv": "^3.3.0",
@@ -70,7 +70,7 @@
     "type": "modules",
     "jsSrcsDir": "specs",
     "android": {
-      "javaPackageName": "com.forsa_quran"
+      "javaPackageName": "com.forsa_quran.database"
     }
   }
 }

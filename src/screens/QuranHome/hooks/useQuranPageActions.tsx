@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import { getWordsByAyaID } from '../../../database/getWordsByAyaID';
-import RNFS from 'react-native-fs';
+import { DocumentDirectoryPath, exists } from '@dr.pogodin/react-native-fs';
 import { downloadPageAudios } from '../../../database/downloadAudios';
-import WebView from 'react-native-webview';
+import { WebView } from 'react-native-webview';
 import Toast from 'react-native-toast-message';
 import { useAppSelector } from '../../../store/hooks/storeHooks';
 import { COLORS } from '../../../constants/colors';
@@ -90,10 +90,10 @@ const useQuranPageActions = ({
       const fileName = aya.audio_url.split('/').pop();
       const fileAyaName = fileName?.split('_').slice(0, 2).join('');
 
-      const localPath = `${RNFS.DocumentDirectoryPath}/${fileAyaName}`;
+      const localPath = `${DocumentDirectoryPath}/${fileAyaName}`;
 
-      const exists = await RNFS.exists(localPath);
-      if (!exists && !isDownloadingRef.current) {
+      const isFileExists = await exists(localPath);
+      if (!isFileExists && !isDownloadingRef.current) {
         isDownloadingRef.current = true;
         try {
           await downloadPageAudios(pageId, p => setDownloadProgress(p));
@@ -169,6 +169,7 @@ const useQuranPageActions = ({
         let words: { word_id: number }[] = [];
         if (isAyahType) {
           words = await getWordsByAyaID(ayaId);
+          console.log('🚀 ~ useQuranPageActions ~ words:', words);
           toggleHighlightAyaHandler(words, true);
         } else {
           toggleHighlightWordHandler(wordId, true);
@@ -179,11 +180,12 @@ const useQuranPageActions = ({
         const fileAyaName = fileName?.split('_').slice(0, 2).join('') + '.mp3';
         console.log('🚀 ~ useQuranPageActions ~ fileAyaName:', fileAyaName);
         const filePath = isAyahType ? fileAyaName : fileName;
-        const localPath = `${RNFS.DocumentDirectoryPath}/${filePath}`;
+        const localPath = `${DocumentDirectoryPath}/${filePath}`;
 
         // Check if file exists, otherwise download all audios for this page
-        const exists = await RNFS.exists(localPath);
-        if (!exists && !isDownloadingRef.current) {
+        const isFileExists = await exists(localPath);
+        console.log('🚀 ~ useQuranPageActions ~ isFileExists:', isFileExists);
+        if (!isFileExists && !isDownloadingRef.current) {
           isDownloadingRef.current = true;
           try {
             await downloadPageAudios(pageId, p => setDownloadProgress(p));
@@ -234,6 +236,7 @@ const useQuranPageActions = ({
       toggleHighlightWordHandler,
     ],
   );
+
   return {
     webViewRef,
     handleWordClick,

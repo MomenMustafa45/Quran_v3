@@ -1,122 +1,185 @@
 // downloadAudioService.ts
-import RNFS from 'react-native-fs';
+import {
+  downloadFile,
+  exists,
+  DocumentDirectoryPath,
+} from '@dr.pogodin/react-native-fs';
 import { executeQuery, prepareParameters } from './connection';
 import Toast from 'react-native-toast-message';
 import { getItem, setItem } from '../../storage';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 
+const TOTAL_QURAN_PAGES = 604;
+const CONCURRENCY_LIMIT = 3;
+const MAX_RETRIES = 2;
+
+/**
+ * Runs `worker` over `items` with at most `limit` running concurrently.
+ * Uses a Set so completed promises are removed correctly (fixes the
+ * old Promise.race/filter bug, which never actually removed anything).
+ */
+async function runWithConcurrency<T>(
+  items: T[],
+  limit: number,
+  worker: (item: T) => Promise<void>,
+): Promise<void> {
+  const executing = new Set<Promise<void>>();
+
+  for (const item of items) {
+    const p = worker(item).finally(() => executing.delete(p));
+    executing.add(p);
+
+    if (executing.size >= limit) {
+      await Promise.race(executing);
+    }
+  }
+
+  await Promise.all(executing);
+}
+
+/**
+ * Downloads a single audio file with exponential-backoff retries.
+ * Returns true on success (or if the file already exists), false if
+ * it ultimately failed after all retries.
+ */
+async function downloadWithRetry(
+  url: string,
+  onFileDone: () => void,
+  retries = MAX_RETRIES,
+): Promise<boolean> {
+  const fileName = url.split('/').pop();
+
+  if (!fileName) {
+    console.warn('Skipping invalid audio URL:', url);
+    onFileDone();
+    return false;
+  }
+
+  const dest = `${DocumentDirectoryPath}/${fileName}`;
+
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      if (await exists(dest)) {
+        onFileDone();
+        return true;
+      }
+
+      await downloadFile({
+        fromUrl: url,
+        toFile: dest,
+        progressDivider: 5,
+      }).promise;
+
+      onFileDone();
+      return true;
+    } catch (err) {
+      const isLastAttempt = attempt === retries - 1;
+      console.log(`retrying (${attempt + 1}/${retries})`, url);
+
+      if (isLastAttempt) {
+        const errorMessage =
+          (err instanceof Error && err.message) ||
+          'Something went wrong while downloading audio.';
+        Toast.show({
+          type: 'error',
+          text1: 'Download failed',
+          text2: errorMessage,
+        });
+        console.error('Download error', url, err);
+        onFileDone();
+        return false;
+      }
+
+      await new Promise(res =>
+        setTimeout(() => {
+          res(true);
+        }, 1000 * 2 ** (attempt + 1)),
+      );
+    }
+  }
+
+  return false;
+}
+
+function markPageAsDownloaded(pageId: number) {
+  const stored = getItem(STORAGE_KEYS.DOWNLOADED_PAGES) as string | undefined;
+  const downloadedPages: Record<number, true> = stored
+    ? JSON.parse(stored)
+    : {};
+
+  downloadedPages[pageId] = true;
+  setItem(STORAGE_KEYS.DOWNLOADED_PAGES, JSON.stringify(downloadedPages));
+}
+
+/**
+ * Fetches all unique audio URLs for a page (Ayats + Words) and downloads
+ * them with limited concurrency and retries. Only marks the page as
+ * downloaded in storage if every file succeeded.
+ */
 export const downloadPageAudios = async (
   pageId: number,
   onProgress?: (progress: number) => void,
-) => {
+): Promise<boolean> => {
   try {
     const urlsParameters = prepareParameters([pageId, pageId]);
-    // Fetch all unique URLs from Ayats + Words
+
     const result = await executeQuery(
       `
-        SELECT audio_url FROM Ayats WHERE page_id = ?
-        UNION
-        SELECT audio_url FROM Words WHERE page_number = ?
+      SELECT audio_url FROM Ayats WHERE page_id = ?
+      UNION
+      SELECT audio_url FROM Words WHERE page_number = ?
       `,
       urlsParameters,
     );
 
-    const urlsSet = new Set<string>();
-    result.rows.forEach((row: any) => {
-      if (row.audio_url) urlsSet.add(row.audio_url);
-    });
+    const urls = [];
 
-    const urls = Array.from(urlsSet);
-    const totalFiles = urls.length;
-    let finishedFiles = 0;
-
-    const concurrencyLimit = 2;
-    let activeDownloads: Promise<void>[] = [];
-
-    const downloadWithRetry = async (
-      url: string,
-      retries = 3,
-    ): Promise<void> => {
-      let attempt = 0;
-      while (attempt < retries) {
-        try {
-          const fileName = url.split('/').pop();
-          const dest = RNFS.DocumentDirectoryPath + '/' + fileName;
-
-          const exists = await RNFS.exists(dest);
-          if (exists) {
-            finishedFiles++;
-            onProgress?.((finishedFiles / totalFiles) * 100);
-            return;
-          }
-
-          await RNFS.downloadFile({
-            fromUrl: url,
-            toFile: dest,
-            progressDivider: 5,
-          }).promise;
-
-          finishedFiles++;
-          onProgress?.((finishedFiles / totalFiles) * 100);
-          return;
-        } catch (err) {
-          console.log('retrying', attempt, url);
-          attempt++;
-          if (attempt >= retries) {
-            const errorMessage =
-              (err instanceof Error && err.message) ||
-              'Something went wrong while downloading audio.';
-            Toast.show({
-              type: 'error',
-              text1: 'Download failed',
-              text2: errorMessage,
-            });
-            console.error('Download error', url, err);
-            onProgress?.(0);
-            return;
-          }
-          await new Promise((res: any) =>
-            setTimeout(res, 1000 * Math.pow(2, attempt)),
-          );
-        }
+    for (const row of result.rows) {
+      if (row.audio_url) {
+        urls.push(row.audio_url);
       }
+    }
+
+    // const urls = Array.from(
+    //   new Set<string>(
+    //     result.rows
+    //       .map((row: any) => row.audio_url)
+    //       .filter((url: string | null | undefined): url is string => !!url),
+    //   ),
+    // );
+
+    const totalFiles = urls.length;
+
+    if (totalFiles === 0) {
+      onProgress?.(100);
+      markPageAsDownloaded(pageId);
+      return true;
+    }
+
+    let finishedFiles = 0;
+    let allSucceeded = true;
+
+    const onFileDone = () => {
+      finishedFiles++;
+      onProgress?.((finishedFiles / totalFiles) * 100);
     };
 
-    for (const url of urls) {
-      if (!url) continue;
+    await runWithConcurrency(urls, CONCURRENCY_LIMIT, async url => {
+      const success = await downloadWithRetry(url, onFileDone);
+      if (!success) allSucceeded = false;
+    });
 
-      const downloadPromise = downloadWithRetry(url);
-      activeDownloads.push(downloadPromise);
-
-      if (activeDownloads.length >= concurrencyLimit) {
-        await Promise.race(activeDownloads);
-        activeDownloads = activeDownloads.filter(
-          p => p !== Promise.race(activeDownloads),
-        );
-      }
+    if (allSucceeded) {
+      markPageAsDownloaded(pageId);
+      console.log('✅ All files downloaded for page', pageId);
+    } else {
+      console.warn('⚠️ Some files failed for page', pageId);
     }
 
-    await Promise.all(activeDownloads);
-
-    // save downloaded pages in storage
-    const storedDownloadedPages = getItem(
-      STORAGE_KEYS.DOWNLOADED_PAGES,
-    ) as string;
-    let downloadedPagesParsed: Record<number, true> = {};
-
-    if (storedDownloadedPages) {
-      downloadedPagesParsed = JSON.parse(storedDownloadedPages);
-    }
-
-    downloadedPagesParsed[pageId] = true;
-
-    setItem(
-      STORAGE_KEYS.DOWNLOADED_PAGES,
-      JSON.stringify(downloadedPagesParsed),
-    );
-    console.log('✅ All files downloaded for page', pageId);
+    return allSucceeded;
   } catch (err) {
     console.error('❌ Download error:', err);
+    return false;
   }
 };
 
@@ -125,21 +188,21 @@ export const downloadAllQuranPages = async (
   onError: (msg: string) => void,
 ) => {
   try {
-    const totalPages = 604;
     let completed = 0;
 
-    for (let pageId = 1; pageId <= totalPages; pageId++) {
+    for (let pageId = 1; pageId <= TOTAL_QURAN_PAGES; pageId++) {
       try {
-        await downloadPageAudios(pageId, () => {});
-        completed++;
-        onProgress((completed / totalPages) * 100);
+        await downloadPageAudios(pageId);
       } catch (err: any) {
-        onError(err.message || `Error on page ${pageId}`);
+        onError(err?.message || `Error on page ${pageId}`);
+      } finally {
+        completed++;
+        onProgress((completed / TOTAL_QURAN_PAGES) * 100);
       }
     }
 
     onProgress(100);
   } catch (err: any) {
-    onError(err.message || 'Unexpected error while downloading all pages');
+    onError(err?.message || 'Unexpected error while downloading all pages');
   }
 };

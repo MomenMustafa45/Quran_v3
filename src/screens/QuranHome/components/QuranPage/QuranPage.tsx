@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { WebView } from 'react-native-webview';
 import * as Progress from 'react-native-progress';
-
 import { getPageData } from '../../../../database/getPageData';
 import { QuranPageData } from '../../../../database/types/quranPageData';
 import { buildPageHTML } from '../../../../utils/buildPageHTML';
@@ -60,6 +59,11 @@ const QuranPage = ({
     loadPage();
   }, [pageId, wordFontSize, isDarkMode, isPortrait]);
 
+  const onMessageHandler = (event: { nativeEvent: { data: string } }) => {
+    const { audio, word, aya } = JSON.parse(event.nativeEvent.data);
+    handleWordClick(audio, word, aya);
+  };
+
   return (
     <View>
       {downloadProgress > 0 && downloadProgress < 100 && (
@@ -88,10 +92,7 @@ const QuranPage = ({
             styles.webview,
             { backgroundColor: isDarkMode ? COLORS.dark : COLORS.whiteGray },
           ]}
-          onMessage={event => {
-            const { audio, word, aya } = JSON.parse(event.nativeEvent.data);
-            handleWordClick(audio, word, aya);
-          }}
+          onMessage={onMessageHandler}
           setSupportMultipleWindows={false}
           androidLayerType="hardware"
           showsVerticalScrollIndicator={false}
