@@ -16,6 +16,14 @@ jobs:
           node-version: 24
           cache: 'npm'
       - run: npm ci
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: ios
+
       - run: pod install --project-directory=ios
 
       - name: Build & Deploy via Fastlane
