@@ -1,36 +1,33 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
 import { getItem } from '../../../../storage';
 import {
-  setCurrentPage,
   setIsDarkMode,
   setWordFontSize,
 } from '../../../store/slices/pageSlice';
 import { useAppDispatch } from '../../../store/hooks/storeHooks';
-import { loadFont } from '../../../utils/loadFont';
 import { QuranSuraType } from '../../../database/types/quranSuras';
 import { QuranJuzType } from '../../../database/types/qraunJuz';
 import BootSplash from 'react-native-bootsplash';
 import { getSuras } from '../../../database/getSuras';
 import { getJuzs } from '../../../database/getJuzs';
 
-const useHomeInitialActions = () => {
-  const [initialPage, setInitialPage] = useState<number | null>(null);
+type UseHomeInitialActionsProps = {
+  scrollToIndex: (pageNumber: number) => void;
+};
+
+const useHomeInitialActions = ({
+  scrollToIndex,
+}: UseHomeInitialActionsProps) => {
   const [suras, setSuras] = useState<QuranSuraType[]>([]);
   const [juzs, setJuzs] = useState<QuranJuzType[]>([]);
-  const loadedFontRef = useRef<string>('');
 
   const dispatch = useAppDispatch();
 
   const getSavedPaged = useCallback(() => {
     const savedPage = getItem(STORAGE_KEYS.CURRENT_PAGE);
-    if (savedPage) {
-      dispatch(setCurrentPage(Number(savedPage)));
-      setInitialPage(Number(savedPage) - 1);
-    } else {
-      setInitialPage(0);
-    }
-  }, [dispatch]);
+    scrollToIndex(Number(savedPage) || 1);
+  }, [scrollToIndex]);
 
   const getSavedPageSettings = useCallback(() => {
     const fontSizeWord = getItem(STORAGE_KEYS.WORD_FONT_SIZE);
@@ -43,24 +40,33 @@ const useHomeInitialActions = () => {
     }
   }, [dispatch]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const init = async () => {
-      const font = await loadFont();
-      loadedFontRef.current = font;
+      console.log('init working from here');
 
-      const [surasData, juzsData] = await Promise.all([getSuras(), getJuzs()]);
-      setSuras(surasData);
-      setJuzs(juzsData);
+      try {
+        const [surasData, juzsData] = await Promise.all([
+          getSuras(),
+          getJuzs(),
+        ]);
+        setSuras(surasData);
+        setJuzs(juzsData);
 
-      getSavedPaged();
-      getSavedPageSettings();
+        getSavedPageSettings();
 
-      await BootSplash.hide({ fade: true });
+        await BootSplash.hide({ fade: true });
+      } catch (error) {
+        console.log('🚀 ~ init ~ error:', error);
+      }
     };
     init();
-  }, [dispatch, getSavedPaged, getSavedPageSettings]);
+  }, [dispatch, getSavedPageSettings]);
 
-  return { initialPage, suras, juzs, loadedFontRef };
+  useEffect(() => {
+    getSavedPaged();
+  }, [getSavedPaged]);
+
+  return { suras, juzs };
 };
 
 export default useHomeInitialActions;

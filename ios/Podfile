@@ -16,7 +16,8 @@ end
 pod 'Google-Mobile-Ads-SDK'
 target 'forsa_quran' do
   config = use_native_modules!
-
+use_frameworks! :linkage => :static
+$RNFirebaseAsStaticFramework = true
   use_react_native!(
     :path => config[:reactNativePath],
     # An absolute path to your application root.
@@ -26,13 +27,20 @@ target 'forsa_quran' do
   # Add GRDB.swift only
   pod 'GRDB.swift'
 
-  post_install do |installer|
-    # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
-    react_native_post_install(
-      installer,
-      config[:reactNativePath],
-      :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
-    )
+post_install do |installer|
+  react_native_post_install(
+    installer,
+    config[:reactNativePath],
+    :mac_catalyst_enabled => false,
+  )
+
+  # ✅ Fix for fmt (Xcode 15/16 issue)
+  installer.pods_project.targets.each do |target|
+    if target.name == 'fmt'
+      target.build_configurations.each do |config|
+        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+      end
+    end
   end
+end
 end

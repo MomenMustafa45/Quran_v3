@@ -1,4 +1,4 @@
-import { Switch, SwitchChangeEvent, View } from 'react-native';
+import { ScrollView, Switch, SwitchChangeEvent, View } from 'react-native';
 import React, { useCallback, useEffect } from 'react';
 import AppModal from '../../AppModal/AppModal';
 import { QuranModalTypes } from '../../../screens/QuranHome/hooks/useQuranModals';
@@ -44,25 +44,24 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
   const getStoredColor = useCallback(() => {
     const storedTextColor = getItem(STORAGE_KEYS.LISTEN_WORD_COLOR);
     const storedBgTextColor = getItem(STORAGE_KEYS.LISTEN_WORD_BG_COLOR);
+
     const soundColorsObj: SoundColorsType = {
       wordTextColor: soundColors.wordTextColor,
       wordBgColor: soundColors.wordBgColor,
     };
+
     if (storedTextColor)
       soundColorsObj.wordTextColor = storedTextColor.toString();
+
     if (storedBgTextColor)
       soundColorsObj.wordBgColor = storedBgTextColor.toString();
+
     dispatch(setSoundColors({ ...soundColorsObj }));
   }, [dispatch, soundColors.wordBgColor, soundColors.wordTextColor]);
 
   useEffect(() => {
     getStoredColor();
-  }, [
-    dispatch,
-    getStoredColor,
-    soundColors.wordBgColor,
-    soundColors.wordTextColor,
-  ]);
+  }, [getStoredColor]);
 
   const soundBgTxtHandler = (color: string) => {
     dispatch(setSoundColors({ ...soundColors, wordBgColor: color }));
@@ -83,16 +82,19 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
     setItem(STORAGE_KEYS.IS_DARK_MODE, changedValue);
     dispatch(setIsDarkMode(changedValue));
   };
+
   return (
     <AppModal
       visible={visible}
       onClose={() => onClose(QuranModalTypes.Settings)}
       title="إعدادات الصفحة"
       animationType="fade"
-      modalParentCustomStyles={styles.modalAppParent}
-      customModalContentStyles={styles.modalAppContainer}
+      customModalContentStyles={styles.modalContainer}
     >
-      <View style={styles.modalContentParent}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         <AppColorPick
           colorBtns={colorBtns}
           title="لون الكلمة أثناء الإستماع"
@@ -102,6 +104,7 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
           setTextColorPicked={soundTxtHandler}
           setBgTextColorPicked={soundBgTxtHandler}
         />
+
         <AppColorPick
           colorBtns={colorBtns}
           title="لون خلفية الكلمة أثناء الإستماع"
@@ -112,11 +115,12 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
           setBgTextColorPicked={soundBgTxtHandler}
         />
 
-        {/* dark mode switcher */}
+        {/* Dark mode */}
         <View style={styles.darkChangeContainer}>
           <AppText style={styles.wordFontSizeTitle}>
             الوضع {isDarkMode ? 'الليلي' : 'النهاري'}
           </AppText>
+
           <Switch
             thumbColor={COLORS.deepGold}
             value={isDarkMode}
@@ -128,12 +132,13 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
           />
         </View>
 
-        {/* word size changer */}
-        <View>
+        {/* Word size */}
+        <View style={styles.fontSizeSection}>
           <View style={styles.wordFontTitleContiner}>
             <AppText style={styles.wordFontSizeTitle}>{wordFontSize}</AppText>
             <AppText style={styles.wordFontSizeTitle}>حجم الكلمة</AppText>
           </View>
+
           <Slider
             style={styles.sliderContainer}
             minimumValue={MIN_FONT_SIZE}
@@ -143,12 +148,13 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
             value={wordFontSize}
             onSlidingComplete={handleFontSizeChange}
           />
-          <AppText style={styles.wordFontSizeTitle}>
+
+          <AppText style={styles.wordFontSizeNotice}>
             ملاحظة: تأكد من ضبط حجم الخط بما يتناسب مع شاشة جهازك حتى لا تظهر
             الكلمات خارج إطار الشاشة.
           </AppText>
         </View>
-      </View>
+      </ScrollView>
     </AppModal>
   );
 };

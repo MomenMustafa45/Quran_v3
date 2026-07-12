@@ -3,7 +3,7 @@ import {
   Modal,
   View,
   TouchableOpacity,
-  TouchableWithoutFeedback,
+  Pressable,
   ViewStyle,
   StyleProp,
 } from 'react-native';
@@ -19,7 +19,7 @@ type AppModalProps = {
   onClose: () => void;
   children?: ReactNode;
   modalParentCustomStyles?: StyleProp<ViewStyle>;
-  animationType?: 'none' | 'slide' | 'fade' | undefined;
+  animationType?: 'none' | 'slide' | 'fade';
   customModalContentStyles?: StyleProp<ViewStyle>;
 };
 
@@ -38,34 +38,39 @@ export default function AppModal({
       transparent
       animationType={animationType}
       onRequestClose={onClose}
+      supportedOrientations={[
+        'portrait',
+        'landscape',
+        'portrait-upside-down',
+        'landscape-left',
+        'landscape-right',
+      ]}
     >
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.backdrop}>
-          {/* Prevent closing when tapping inside modal */}
-          <TouchableWithoutFeedback>
-            <View style={[styles.modalContent, customModalContentStyles]}>
-              {/* Header */}
-              <View style={styles.header}>
-                <AppText style={styles.title}>{title}</AppText>
-                <TouchableOpacity onPress={onClose}>
-                  <AppIcon
-                    name="close"
-                    type="Ionicons"
-                    size={iconSizes['2xl']}
-                    color={COLORS.lightCream}
-                  />
-                </TouchableOpacity>
-              </View>
+      <View style={styles.backdrop}>
+        {/* Backdrop press */}
+        <Pressable style={styles.absoluteFill} onPress={onClose} />
 
-              <View
-                style={[styles.modalContentContainer, modalParentCustomStyles]}
-              >
-                {children}
-              </View>
-            </View>
-          </TouchableWithoutFeedback>
+        {/* Modal */}
+        <View style={[styles.modalContent, customModalContentStyles]}>
+          {/* Header */}
+          <View style={styles.header}>
+            <AppText style={styles.title}>{title}</AppText>
+
+            <TouchableOpacity onPress={onClose}>
+              <AppIcon
+                name="close"
+                type="Ionicons"
+                size={iconSizes['md']}
+                color={COLORS.lightCream}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={[styles.modalContentContainer, modalParentCustomStyles]}>
+            {children}
+          </View>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </Modal>
   );
 }

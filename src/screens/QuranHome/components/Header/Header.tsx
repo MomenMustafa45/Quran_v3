@@ -9,6 +9,7 @@ import { QuranModalTypes } from '../../hooks/useQuranModals';
 import { COLORS } from '../../../../constants/colors';
 import { BUTTON_CONFIGS } from './utils/headerBtns';
 import useHeaderActions from '../../hooks/useHeaderActions';
+import LandScapeHeader from '../LandScapeHeader/LandScapeHeader';
 
 export const soundTypeWord = {
   page: 'صفحة',
@@ -20,9 +21,10 @@ type HeaderProps = {
   suras: QuranSuraType[];
   juzs: QuranJuzType[];
   showModal: (key: QuranModalTypes) => void;
+  isLandscape: boolean;
 };
 
-const Header = ({ suras, juzs, showModal }: HeaderProps) => {
+const Header = ({ suras, juzs, showModal, isLandscape }: HeaderProps) => {
   const isDarkMode = useAppSelector(state => state.page.isDarkMode);
   const { juz, sura, soundType, switchSoundTypeHandler, currentPage } =
     useHeaderActions({
@@ -40,6 +42,16 @@ const Header = ({ suras, juzs, showModal }: HeaderProps) => {
     },
     [showModal, switchSoundTypeHandler],
   );
+
+  if (isLandscape)
+    return (
+      <LandScapeHeader
+        currentJuz={juz?.juz_number || 0}
+        currentPage={currentPage}
+        sura={sura?.result?.name_arabic || ''}
+        showModal={showModal}
+      />
+    );
 
   return (
     <View

@@ -1,90 +1,38 @@
-// connection.ts
-import { Platform, NativeModules } from 'react-native';
-import SQLite from 'react-native-sqlite-storage';
+// database.ts
+import GRDBManager from '../../specs/NativeGRDBManager';
 
-const { GRDBManager } = NativeModules;
+let dbOpened = false;
 
-interface DatabaseResult {
-  rows: any[];
-  rowsAffected: number;
-  insertId: number;
-}
-
-let isDatabaseInitialized = false;
-let dbInstance: SQLite.SQLiteDatabase | null = null;
-
-SQLite.enablePromise(true);
-
-// Android: Using react-native-sqlite-storage
 export async function openDB() {
-  if (!dbInstance) {
-    dbInstance = await SQLite.openDatabase({
-      name: 'quran_arabic.db',
-      createFromLocation: 1,
-    });
-  }
-  return dbInstance;
+  await GRDBManager.openDatabase();
+  dbOpened = true;
 }
 
-// iOS: Using GRDB
-export async function openDBIOS(): Promise<boolean> {
-  if (isDatabaseInitialized) {
-    return true;
+export async function executeQuery(query: string, parameters: any = {}) {
+  if (!dbOpened) {
+    await openDB();
   }
 
-  try {
-    await GRDBManager.openDatabase();
-    isDatabaseInitialized = true;
-    console.log('✅ iOS Database opened successfully');
-    return true;
-  } catch (error) {
-    console.error('❌ Failed to open iOS database:', error);
-    throw error;
+  const iosParams: Record<string, any> = {};
+  Object.values(parameters).forEach((value, index) => {
+    iosParams[`param${index}`] = value;
+  });
+
+  if (parameters['param0'] === null || parameters['param1'] === null) {
+    return { insertId: -1, rowsAffected: 0, rows: [] };
   }
+
+  return GRDBManager.executeQuery(query, iosParams) as Promise<{
+    insertId: number;
+    rowsAffected: number;
+    rows: any[];
+  }>;
 }
 
-// Unified executeQuery function
-export async function executeQuery(
-  query: string,
-  parameters: Record<string, any> = {},
-): Promise<DatabaseResult> {
-  if (Platform.OS === 'ios') {
-    await openDBIOS();
-
-    const iosParams: Record<string, any> = {};
-    Object.values(parameters).forEach((value, index) => {
-      iosParams[`param${index}`] = value;
-    });
-
-    return await GRDBManager.executeQuery(query, iosParams);
-  } else {
-    const db = await openDB();
-    const paramsArray = Object.values(parameters);
-    const [results] = await db.executeSql(query, paramsArray);
-
-    const rows = [];
-    for (let i = 0; i < results.rows.length; i++) {
-      rows.push(results.rows.item(i));
-    }
-
-    return {
-      rows,
-      rowsAffected: results.rowsAffected,
-      insertId: results.insertId,
-    };
-  }
-}
-
-// Helper to convert parameters for different platforms
-export function prepareParameters(
-  parameters: any[] | Record<string, any>,
-): Record<string, any> {
-  if (Array.isArray(parameters)) {
-    const result: Record<string, any> = {};
-    parameters.forEach((value, index) => {
-      result[`param${index + 1}`] = value;
-    });
-    return result;
-  }
-  return parameters;
+export function prepareParameters(parameters: any[]) {
+  const result: Record<string, any> = {};
+  parameters.forEach((value, index) => {
+    result[`param${index}`] = value;
+  });
+  return result;
 }

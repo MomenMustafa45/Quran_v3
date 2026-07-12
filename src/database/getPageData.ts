@@ -41,6 +41,7 @@ export async function getPageData(pageId: number): Promise<PageDataResult> {
       line.first_word_id,
       line.last_word_id,
     ]);
+
     // Get words for this line
     const wordResult = await executeQuery(
       `SELECT * FROM Words

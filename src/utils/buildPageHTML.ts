@@ -6,6 +6,7 @@ type BuildPageHTMLParamTypes = {
   loadedFont: string;
   wordFontSize: number;
   isDarkMode: boolean;
+  isPortrait?: boolean;
 };
 
 export const buildPageHTML = ({
@@ -13,6 +14,7 @@ export const buildPageHTML = ({
   loadedFont,
   wordFontSize,
   isDarkMode,
+  isPortrait,
 }: BuildPageHTMLParamTypes) => {
   return `
     <html lang="ar">
@@ -44,9 +46,10 @@ export const buildPageHTML = ({
             flex-direction: column;
             justify-content: flex-start;
             font-family: 'UthmaniHafs';
-            flex: 1;
-            padding:0 2vw;
+            height: 100%;
+            padding:0 1.5vw;
             background-color:tansparent;
+            overflow: scroll;
  }
           .line {
             display: flex;
@@ -54,7 +57,7 @@ export const buildPageHTML = ({
             align-items: center;
             width: 100%;
             white-space: nowrap;
-            height:6.5vh;
+            height:${isPortrait ? '6.5vh' : '8.5vw'};
           }
           .line.center {
             justify-content: center;
@@ -72,11 +75,12 @@ export const buildPageHTML = ({
             display: flex;
             width: 100%;
             white-space: nowrap;
-            height:6.5vh;
+            height:6.5${isPortrait ? 'vh' : 'vw'};
             justify-content: center;
             align-items: center;
-            overflow: hidden;
+            // overflow: hidden;
             color:${isDarkMode ? COLORS.whiteGray : COLORS.dark};
+            margin: ${isPortrait ? '0' : '40px'} 0;
             }
         </style>
       </head>
@@ -113,7 +117,11 @@ export const buildPageHTML = ({
             }
             return `
             <div id="${lineId}" class="line ${
-              l.line.is_centered === 1 ? 'center' : 'space-between'
+              l.line.is_centered === 1 ||
+              l.line.page_id < 3 ||
+              l.line.page_id > 590
+                ? 'center'
+                : 'space-between'
             }">
             
               ${l.words
@@ -121,7 +129,7 @@ export const buildPageHTML = ({
                   const wordId = `${w.word_id}`;
 
                   return `
-                  ${`<p id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', aya: '${w.ayat_id}' }))">${w.text_uthmani}</p>`}
+                  ${`<p id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', aya: '${w.ayat_id}' }))">${w.word_qpc_v4}</p>`}
                   `;
                 })
                 .join(' ')}

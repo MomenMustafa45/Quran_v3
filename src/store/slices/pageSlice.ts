@@ -27,7 +27,7 @@ const initialState: PageState = {
     wordTextColor: COLORS.white,
     wordBgColor: COLORS.goldAccent,
   },
-  wordFontSize: 5.0,
+  wordFontSize: 5.3,
   isDarkMode: false,
 };
 

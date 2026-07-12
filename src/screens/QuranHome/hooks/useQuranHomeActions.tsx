@@ -1,9 +1,9 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import {
-  Dimensions,
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  useWindowDimensions,
 } from 'react-native';
 import Sound from 'react-native-sound';
 import Toast from 'react-native-toast-message';
@@ -12,14 +12,24 @@ import { setCurrentPage } from '../../../store/slices/pageSlice';
 import { setItem } from '../../../../storage';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
 import { getRTLPageNumber } from '../../../utils/getRLTPageNumber';
-
-const { width } = Dimensions.get('window');
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { landScapeBtnWidth } from '../../../constants/desingSystem';
 
 const useQuranHomeActions = () => {
   const flatListRef = useRef<FlatList<number>>(null);
   const currentSoundRef = useRef<Sound | null>(null);
   const stopCallbackRef = useRef<(() => void) | null>(null);
   const dispatch = useAppDispatch();
+
+  // get screen dimensions
+  const { width, height } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const safeWidth = width - insets.left - insets.right;
+  const isPortrait = useMemo(() => height >= width, [height, width]);
+
+  const contentWidth = isPortrait
+    ? safeWidth
+    : safeWidth - landScapeBtnWidth * 2;
 
   /** Stop any currently playing sound + clear highlight */
   const stopCurrentSound = () => {
@@ -74,29 +84,35 @@ const useQuranHomeActions = () => {
     [],
   );
 
+  const currentPageSetter = useCallback(
+    (pageNumber: number) => {
+      dispatch(setCurrentPage(pageNumber));
+      setItem(STORAGE_KEYS.CURRENT_PAGE, pageNumber);
+    },
+    [dispatch],
+  );
+
   const getCurrentPageIndex = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const offsetX = event.nativeEvent.contentOffset.x;
-      const currentIndex = Math.round(offsetX / width);
+      const currentIndex = Math.round(offsetX / contentWidth);
       const currentPageNumber = getRTLPageNumber(currentIndex);
 
-      dispatch(setCurrentPage(currentPageNumber));
-      setItem(STORAGE_KEYS.CURRENT_PAGE, currentPageNumber);
+      currentPageSetter(currentPageNumber);
     },
-    [dispatch],
+    [currentPageSetter, contentWidth],
   );
 
   const scrollToIndex = useCallback(
     (pageNumber: number) => {
       if (!flatListRef.current) return;
 
-      const offset = (pageNumber - 1) * width;
-      dispatch(setCurrentPage(pageNumber));
-      setItem(STORAGE_KEYS.CURRENT_PAGE, pageNumber);
+      const offset = (pageNumber - 1) * contentWidth;
+      currentPageSetter(pageNumber);
 
       flatListRef.current?.scrollToOffset({ offset, animated: false });
     },
-    [dispatch],
+    [currentPageSetter, contentWidth],
   );
 
   return {
@@ -105,6 +121,8 @@ const useQuranHomeActions = () => {
     stopCurrentSound,
     getCurrentPageIndex,
     scrollToIndex,
+    isPortrait,
+    contentWidth,
   };
 };
 

@@ -29,12 +29,19 @@ export const styles = StyleSheet.create({
     padding: paddings.md,
   },
   title: {
-    fontSize: fontSizes.xl,
+    fontSize: fontSizes.md,
     fontWeight: '800',
     color: COLORS.lightCream,
   },
 
   modalContentContainer: {
     flex: 1,
+  },
+  absoluteFill: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });
