@@ -21,8 +21,7 @@ export const searchAyats = async (query: string): Promise<QuranAyahType[]> => {
     );
 
     return result.rows;
-  } catch (error) {
-    console.log('🚀 ~ searchAyats ~ error:', error);
+  } catch {
     return [];
   }
 };

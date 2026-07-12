@@ -169,7 +169,6 @@ export const downloadPageAudios = async (
 
     if (allSucceeded) {
       markPageAsDownloaded(pageId);
-      console.log('✅ All files downloaded for page', pageId);
     } else {
       console.warn('⚠️ Some files failed for page', pageId);
     }
