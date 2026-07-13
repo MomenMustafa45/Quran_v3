@@ -27,6 +27,9 @@ jobs:
       - name: Decode Keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/qurany.keystore
 
+      - name: Decode Play Store JSON Key
+        run: echo '${{ secrets.PLAY_STORE_JSON_KEY }}' > android/fastlane/play-store-key.json
+
       - name: Build & Deploy via Fastlane
         working-directory: android
         run: bundle exec fastlane release
