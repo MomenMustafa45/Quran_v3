@@ -42,8 +42,6 @@ const useHomeInitialActions = ({
 
   useLayoutEffect(() => {
     const init = async () => {
-      console.log('init working from here');
-
       try {
         const [surasData, juzsData] = await Promise.all([
           getSuras(),

@@ -76,7 +76,6 @@ const useQuranPageActions = ({
   const playPageAudio = useCallback(async () => {
     // TODO: Replace with your function to get all ayah IDs for page
     const ayahsInPage = await getAyahsByPageId(pageId);
-    console.log('🚀 ~ useQuranPageActions ~ ayahsInPage:', ayahsInPage);
 
     const playAyaSequentially = async (index: number) => {
       if (index >= ayahsInPage.length) {
@@ -169,7 +168,6 @@ const useQuranPageActions = ({
         let words: { word_id: number }[] = [];
         if (isAyahType) {
           words = await getWordsByAyaID(ayaId);
-          console.log('🚀 ~ useQuranPageActions ~ words:', words);
           toggleHighlightAyaHandler(words, true);
         } else {
           toggleHighlightWordHandler(wordId, true);
@@ -178,19 +176,16 @@ const useQuranPageActions = ({
         // Determine local file path
         const fileName = audioUrl.split('/').pop();
         const fileAyaName = fileName?.split('_').slice(0, 2).join('') + '.mp3';
-        console.log('🚀 ~ useQuranPageActions ~ fileAyaName:', fileAyaName);
         const filePath = isAyahType ? fileAyaName : fileName;
         const localPath = `${DocumentDirectoryPath}/${filePath}`;
 
         // Check if file exists, otherwise download all audios for this page
         const isFileExists = await exists(localPath);
-        console.log('🚀 ~ useQuranPageActions ~ isFileExists:', isFileExists);
         if (!isFileExists && !isDownloadingRef.current) {
           isDownloadingRef.current = true;
           try {
             await downloadPageAudios(pageId, p => setDownloadProgress(p));
           } catch (error) {
-            console.log('🚀 ~ handleWordClick ~ error:', error);
             const errorMessage =
               (error instanceof Error && error.message) ||
               'Something went wrong while downloading this page audio.';
