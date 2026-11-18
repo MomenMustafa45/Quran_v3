@@ -1,7 +1,10 @@
-// pageDataService.ts
 import { executeQuery, prepareParameters } from './connection';
 import { QuranLineType } from './types/quranLine';
 import { QuranWordType } from './types/quranWord';
+import {
+  getCachedPageData,
+  setCachedPageData,
+} from './pageDataCache';
 
 export interface PageDataResult {
   surah: string;
@@ -11,9 +14,21 @@ export interface PageDataResult {
   }>;
 }
 
-export async function getPageData(pageId: number): Promise<PageDataResult> {
-  // Get all lines of the page
+function groupWordsByLine(
+  lines: QuranLineType[],
+  words: QuranWordType[],
+): PageDataResult['lines'] {
+  return lines.map(line => ({
+    line,
+    words: words.filter(
+      word =>
+        word.word_id >= line.first_word_id &&
+        word.word_id <= line.last_word_id,
+    ),
+  }));
+}
 
+async function fetchPageDataFromDb(pageId: number): Promise<PageDataResult> {
   const parametersPageId = prepareParameters([pageId]);
 
   const lineResult = await executeQuery(
@@ -25,8 +40,9 @@ export async function getPageData(pageId: number): Promise<PageDataResult> {
     return { surah: '', lines: [] };
   }
 
-  const parametersSuraId = prepareParameters([lineResult.rows[0].sura_id]);
-  // Get surah name from first line
+  const lines = lineResult.rows as QuranLineType[];
+
+  const parametersSuraId = prepareParameters([lines[0].sura_id]);
   const suraResult = await executeQuery(
     `SELECT name_arabic FROM suras WHERE sura_id = ?;`,
     parametersSuraId,
@@ -34,27 +50,29 @@ export async function getPageData(pageId: number): Promise<PageDataResult> {
 
   const surahName: string = suraResult.rows[0]?.name_arabic || '';
 
-  // Prepare lines with words
-  const lines = [];
-  for (const line of lineResult.rows) {
-    const parametersLineWords = prepareParameters([
-      line.first_word_id,
-      line.last_word_id,
-    ]);
+  const minWordId = Math.min(...lines.map(line => line.first_word_id));
+  const maxWordId = Math.max(...lines.map(line => line.last_word_id));
 
-    // Get words for this line
-    const wordResult = await executeQuery(
-      `SELECT * FROM Words
-       WHERE word_id BETWEEN ? AND ?
-       ORDER BY word_id;`,
-      parametersLineWords,
-    );
+  const wordResult = await executeQuery(
+    `SELECT * FROM Words WHERE word_id BETWEEN ? AND ? ORDER BY word_id;`,
+    prepareParameters([minWordId, maxWordId]),
+  );
 
-    lines.push({
-      line: line,
-      words: wordResult.rows,
-    });
+  const words = wordResult.rows as QuranWordType[];
+
+  return {
+    surah: surahName,
+    lines: groupWordsByLine(lines, words),
+  };
+}
+
+export async function getPageData(pageId: number): Promise<PageDataResult> {
+  const cached = getCachedPageData(pageId);
+  if (cached) {
+    return cached;
   }
 
-  return { surah: surahName, lines };
+  const result = await fetchPageDataFromDb(pageId);
+  setCachedPageData(pageId, result);
+  return result;
 }

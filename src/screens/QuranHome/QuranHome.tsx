@@ -14,6 +14,7 @@ import useHomeInitialActions from './hooks/useHomeInitialActions';
 import { useAppSelector } from '../../store/hooks/storeHooks';
 import { COLORS } from '../../constants/colors';
 import LandScapeBtn from './components/LandScapeBtn/LandScapeBtn';
+import { QURAN_PAGE_IDS } from '../../constants/quranPages';
 import { useNavigation } from '@react-navigation/native';
 import { getAnalytics, logEvent } from '@react-native-firebase/analytics';
 import {
@@ -126,7 +127,7 @@ const QuranHome = () => {
         <FlatList
           key={contentWidth}
           ref={flatListRef}
-          data={Array.from({ length: 604 }, (_, i) => i + 1)}
+          data={QURAN_PAGE_IDS}
           keyExtractor={item => `page-${item}`}
           renderItem={renderItem}
           onMomentumScrollEnd={handlePageChange}

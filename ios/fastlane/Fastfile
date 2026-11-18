@@ -16,37 +16,65 @@
 default_platform(:ios)
 
 platform :ios do
-  desc "Description of what the lane does"
-  lane :custom_lane do
-    # add actions here: https://docs.fastlane.tools/actions
-  end
+  APP_IDENTIFIER = "com.forsa-quran"
+  XCODE_PROJECT = "forsa_quran.xcodeproj"
+  XCODE_SCHEME = "forsa_quran"
 
-  desc "Build and upload a release build to TestFlight"
-  lane :release do
-    api_key = app_store_connect_api_key(
+  private_lane :app_store_connect_api_key_from_env do
+    app_store_connect_api_key(
       key_id: ENV["APP_STORE_CONNECT_KEY_ID"],
       issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
       key_content: ENV["APP_STORE_CONNECT_KEY_CONTENT"],
       is_key_content_base64: false
     )
+  end
+
+  private_lane :match_appstore_profile_name do
+    mapping = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]
+    profile_name = mapping&.fetch(APP_IDENTIFIER, nil)
+    unless profile_name
+      UI.user_error!(
+        "No App Store provisioning profile for #{APP_IDENTIFIER}. " \
+        "Match mapping: #{mapping.inspect}"
+      )
+    end
+    profile_name
+  end
+
+  private_lane :prepare_app_store_build do |options|
+    api_key = options[:api_key]
 
     match(
       type: "appstore",
       api_key: api_key
     )
 
-    profile_name = lane_context[SharedValues::MATCH_PROVISIONING_PROFILE_MAPPING]["com.forsa-quran"]
+    profile_name = match_appstore_profile_name
 
     update_code_signing_settings(
       use_automatic_signing: false,
-      path: "forsa_quran.xcodeproj",
+      path: XCODE_PROJECT,
       code_sign_identity: "Apple Distribution",
-      bundle_identifier: "com.forsa-quran",
+      bundle_identifier: APP_IDENTIFIER,
       profile_name: profile_name,
       team_id: ENV["APPLE_TEAM_ID"]
     )
 
-    build_app(scheme: "forsa_quran")
+    build_app(scheme: XCODE_SCHEME)
+
+    api_key
+  end
+
+  desc "Build a release IPA with App Store signing (no TestFlight upload)"
+  lane :build do
+    api_key = app_store_connect_api_key_from_env
+    prepare_app_store_build(api_key: api_key)
+  end
+
+  desc "Build and upload a release build to TestFlight"
+  lane :release do
+    api_key = app_store_connect_api_key_from_env
+    prepare_app_store_build(api_key: api_key)
 
     upload_to_testflight(
       api_key: api_key

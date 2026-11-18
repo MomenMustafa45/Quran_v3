@@ -2,9 +2,9 @@ git_url(ENV["MATCH_GIT_URL"])
 
 storage_mode("git")
 
-type("development") # The default type, can be: appstore, adhoc, enterprise or development
+type("appstore")
 
-app_identifier(["com.forsa-quran"]) # <-- set this to your actual iOS bundle ID
+app_identifier(["com.forsa-quran"])
 
 
 # app_identifier(["tools.fastlane.app", "tools.fastlane.app2"])

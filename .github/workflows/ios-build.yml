@@ -26,7 +26,20 @@ jobs:
 
       - run: pod install --project-directory=ios
 
+      - name: Build via Fastlane
+        if: github.event_name == 'pull_request'
+        working-directory: ios
+        run: bundle exec fastlane build
+        env:
+          MATCH_GIT_URL: https://${{ secrets.MATCH_GIT_TOKEN }}@github.com/MomenMustafa45/Quran_v3-certificates.git
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
       - name: Build & Deploy via Fastlane
+        if: github.event_name == 'push'
         working-directory: ios
         run: bundle exec fastlane release
         env:

@@ -31,28 +31,26 @@ const useQuranHomeActions = () => {
     ? safeWidth
     : safeWidth - landScapeBtnWidth * 2;
 
-  /** Stop any currently playing sound + clear highlight */
-  const stopCurrentSound = () => {
+  const stopCurrentSound = useCallback(() => {
     if (currentSoundRef.current) {
       currentSoundRef.current.stop(() => {
         currentSoundRef.current?.release();
         currentSoundRef.current = null;
 
-        // remove highlight from last word/ayah
         if (stopCallbackRef.current) {
           stopCallbackRef.current();
           stopCallbackRef.current = null;
         }
       });
     }
-  };
+  }, []);
 
   /** Play sound and attach cleanup callback */
   const playSound = useCallback(
     (
       filePath: string,
       onFinished?: () => void,
-      onStop?: () => void, // 🔥 pass from QuranPage to remove highlights early
+      onStop?: () => void,
     ) => {
       stopCurrentSound();
 
@@ -81,7 +79,7 @@ const useQuranHomeActions = () => {
         });
       });
     },
-    [],
+    [stopCurrentSound],
   );
 
   const currentPageSetter = useCallback(

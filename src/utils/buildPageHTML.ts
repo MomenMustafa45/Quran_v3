@@ -1,5 +1,23 @@
 import { COLORS } from '../constants/colors';
 import { QuranPageData } from '../database/types/quranPageData';
+import { escapeHtml } from './escapeHtml';
+import { encodeWordClickPayload } from './webViewWordPayload';
+
+const WORD_CLICK_DELEGATION_SCRIPT = `
+<script>
+(function () {
+  document.body.addEventListener('click', function (event) {
+    var target = event.target;
+    if (!target || !target.closest) return;
+    var wordEl = target.closest('.word[data-payload]');
+    if (!wordEl || !window.ReactNativeWebView) return;
+    var payload = wordEl.getAttribute('data-payload');
+    if (!payload) return;
+    window.ReactNativeWebView.postMessage(decodeURIComponent(payload));
+  });
+})();
+</script>
+`;
 
 type BuildPageHTMLParamTypes = {
   data: QuranPageData;
@@ -48,7 +66,7 @@ export const buildPageHTML = ({
             font-family: 'UthmaniHafs';
             height: 100%;
             padding:0 1.5vw;
-            background-color:tansparent;
+            background-color:transparent;
             overflow: scroll;
  }
           .line {
@@ -128,15 +146,20 @@ export const buildPageHTML = ({
                 .map(w => {
                   const wordId = `${w.word_id}`;
 
-                  return `
-                  ${`<p id="${wordId}" class="word" onclick="window.ReactNativeWebView.postMessage(JSON.stringify({ audio: '${w.audio_url}', word: '${wordId}', aya: '${w.ayat_id}' }))">${w.word_qpc_v4}</p>`}
-                  `;
+                  const payload = encodeWordClickPayload({
+                    audio: w.audio_url ?? '',
+                    word: wordId,
+                    aya: w.ayat_id,
+                  });
+
+                  return `<p id="${wordId}" class="word" data-payload="${payload}">${escapeHtml(w.word_qpc_v4 ?? '')}</p>`;
                 })
                 .join(' ')}
             </div>
           `;
           })
           .join('')}
+      ${WORD_CLICK_DELEGATION_SCRIPT}
       </body>
     </html>
   `;

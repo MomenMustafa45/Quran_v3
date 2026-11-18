@@ -36,6 +36,11 @@ platform :android do
     upload_to_play_store
   end
 
+  desc "Build release AAB without Play Store upload"
+  lane :build do
+    gradle(task: "clean bundleRelease")
+  end
+
   desc "Build and upload a release AAB to the Play Store internal track"
   lane :release do
     gradle(task: "clean bundleRelease")

@@ -2,20 +2,29 @@ import { MMKV } from 'react-native-mmkv';
 
 export const storage = new MMKV();
 
-// 🔹 Helpers for type-safe access
 export const setItem = (key: string, value: string | number | boolean) => {
   storage.set(key, value);
 };
 
-export const getItem = (key: string) => {
-  const value = storage.getString(key);
-  if (value) return value;
+export const getItem = (key: string): string | number | boolean | null => {
+  if (!storage.contains(key)) {
+    return null;
+  }
 
-  const numValue = storage.getNumber(key);
-  if (numValue) return numValue;
+  const stringValue = storage.getString(key);
+  if (stringValue !== undefined) {
+    return stringValue;
+  }
 
-  const boolValue = storage.getBoolean(key);
-  if (boolValue !== undefined) return boolValue;
+  const numberValue = storage.getNumber(key);
+  if (numberValue !== undefined) {
+    return numberValue;
+  }
+
+  const booleanValue = storage.getBoolean(key);
+  if (booleanValue !== undefined) {
+    return booleanValue;
+  }
 
   return null;
 };

@@ -1,13 +1,13 @@
 // GRDBManagerPackage.kt
 package com.forsa_quran.database
 
-import com.facebook.react.TurboReactPackage
+import com.facebook.react.BaseReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.model.ReactModuleInfo
 import com.facebook.react.module.model.ReactModuleInfoProvider
 
-class GRDBManagerPackage : TurboReactPackage() {
+class GRDBManagerPackage : BaseReactPackage() {
 
     override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {
         return if (name == GRDBManagerModule.NAME) GRDBManagerModule(reactContext) else null

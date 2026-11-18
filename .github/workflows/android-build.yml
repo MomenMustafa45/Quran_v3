@@ -25,12 +25,24 @@ jobs:
           working-directory: android
 
       - name: Decode Keystore
+        if: github.event_name == 'push'
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/qurany.keystore
 
       - name: Decode Play Store JSON Key
+        if: github.event_name == 'push'
         run: echo '${{ secrets.PLAY_STORE_JSON_KEY }}' > android/fastlane/play-store-key.json
 
+      - name: Build via Fastlane
+        if: github.event_name == 'pull_request'
+        working-directory: android
+        run: bundle exec fastlane build
+        env:
+          MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.MYAPP_UPLOAD_STORE_PASSWORD }}
+          MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.MYAPP_UPLOAD_KEY_ALIAS }}
+          MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.MYAPP_UPLOAD_KEY_PASSWORD }}
+
       - name: Build & Deploy via Fastlane
+        if: github.event_name == 'push'
         working-directory: android
         run: bundle exec fastlane release
         env:

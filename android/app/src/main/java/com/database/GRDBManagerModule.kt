@@ -73,17 +73,16 @@ class GRDBManagerModule(reactContext: ReactApplicationContext) :
             val params = mutableListOf<String?>()
 
             parameters?.let {
-                val map = it.toHashMap()
-                for (i in 0 until map.size) {
-                    val key = "param$i"
-                    if (it.hasKey(key)) {
-                        when (it.getType(key)) {
-                            ReadableType.String -> params.add(it.getString(key))
-                            ReadableType.Number -> params.add(it.getDouble(key).toString())
-                            ReadableType.Boolean -> params.add(if (it.getBoolean(key)) "1" else "0")
-                            else -> params.add("")
-                        }
+                var index = 0
+                while (it.hasKey("param$index")) {
+                    val key = "param$index"
+                    when (it.getType(key)) {
+                        ReadableType.String -> params.add(it.getString(key))
+                        ReadableType.Number -> params.add(it.getDouble(key).toString())
+                        ReadableType.Boolean -> params.add(if (it.getBoolean(key)) "1" else "0")
+                        else -> params.add("")
                     }
+                    index++
                 }
             }
 

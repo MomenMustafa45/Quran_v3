@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { WebView } from 'react-native-webview';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import * as Progress from 'react-native-progress';
 import { getPageData } from '../../../../database/getPageData';
 import { QuranPageData } from '../../../../database/types/quranPageData';
@@ -32,37 +32,81 @@ const QuranPage = ({
   width,
 }: QuranPageProps) => {
   const [htmlContent, setHtmlContent] = useState<string>('');
-  const { webViewRef, handleWordClick, downloadProgress } = useQuranPageActions(
-    {
-      pageId,
-      playSound,
-      stopCurrentSound,
-    },
-  );
+  const [payloadVersion, setPayloadVersion] = useState(0);
+  const pagePayloadRef = useRef<{
+    data: QuranPageData;
+    loadedFont: string;
+  } | null>(null);
+  const loadedPageIdRef = useRef<number | null>(null);
+
+  const { webViewRef, handleWordClick, downloadProgress } = useQuranPageActions({
+    pageId,
+    playSound,
+    stopCurrentSound,
+  });
   const wordFontSize = useAppSelector(state => state.page.wordFontSize);
   const isDarkMode = useAppSelector(state => state.page.isDarkMode);
 
   useEffect(() => {
-    const loadPage = async () => {
-      const data: QuranPageData = await getPageData(pageId);
-      const loadedFont = await loadFont(pageId);
+    let cancelled = false;
 
-      const pageHtml = buildPageHTML({
-        data,
-        loadedFont: loadedFont || '',
+    const loadPagePayload = async () => {
+      const [data, loadedFont] = await Promise.all([
+        getPageData(pageId),
+        loadFont(pageId),
+      ]);
+
+      if (cancelled) {
+        return;
+      }
+
+      pagePayloadRef.current = { data, loadedFont: loadedFont ?? '' };
+      loadedPageIdRef.current = pageId;
+      setPayloadVersion(version => version + 1);
+    };
+
+    loadPagePayload();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pageId]);
+
+  useEffect(() => {
+    const payload = pagePayloadRef.current;
+    if (!payload || loadedPageIdRef.current !== pageId) {
+      return;
+    }
+
+    setHtmlContent(
+      buildPageHTML({
+        data: payload.data,
+        loadedFont: payload.loadedFont,
         wordFontSize,
         isDarkMode,
         isPortrait,
-      });
-      setHtmlContent(pageHtml);
-    };
-    loadPage();
-  }, [pageId, wordFontSize, isDarkMode, isPortrait]);
+      }),
+    );
+  }, [pageId, wordFontSize, isDarkMode, isPortrait, payloadVersion]);
 
-  const onMessageHandler = (event: { nativeEvent: { data: string } }) => {
-    const { audio, word, aya } = JSON.parse(event.nativeEvent.data);
-    handleWordClick(audio, word, aya);
-  };
+  const handleWebViewMessage = useCallback(
+    (event: WebViewMessageEvent) => {
+      try {
+        const parsed = JSON.parse(event.nativeEvent.data) as {
+          audio?: string;
+          word?: string;
+          aya?: number | string;
+        };
+        if (!parsed.audio || !parsed.word || parsed.aya === undefined) {
+          return;
+        }
+        handleWordClick(parsed.audio, parsed.word, Number(parsed.aya));
+      } catch {
+        return;
+      }
+    },
+    [handleWordClick],
+  );
 
   return (
     <View>
@@ -84,7 +128,7 @@ const QuranPage = ({
         />
       )}
       <View style={[styles.pageParent, { width, flex: 1 }]}>
-        {/* @ts-ignore */}
+        {/* @ts-expect-error WebView ref typing mismatch in current @types */}
         <WebView
           ref={webViewRef}
           originWhitelist={['*']}
@@ -93,7 +137,7 @@ const QuranPage = ({
             styles.webview,
             { backgroundColor: isDarkMode ? COLORS.dark : COLORS.whiteGray },
           ]}
-          onMessage={onMessageHandler}
+          onMessage={handleWebViewMessage}
           setSupportMultipleWindows={false}
           androidLayerType="hardware"
           showsVerticalScrollIndicator={false}

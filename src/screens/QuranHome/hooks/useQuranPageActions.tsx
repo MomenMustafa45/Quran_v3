@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { getWordsByAyaID } from '../../../database/getWordsByAyaID';
-import { DocumentDirectoryPath, exists } from '@dr.pogodin/react-native-fs';
+import { resolvePlayableLocalAudioPath } from '../../../utils/audioLocalPath';
+import { exists } from '@dr.pogodin/react-native-fs';
 import { downloadPageAudios } from '../../../database/downloadAudios';
 import { WebView } from 'react-native-webview';
 import Toast from 'react-native-toast-message';
@@ -38,18 +39,18 @@ const useQuranPageActions = ({
     (words: { word_id: number }[], highlight = true) => {
       const highlightedWord = soundTxtColors.wordTextColor;
       const highlightBGWord = soundTxtColors.wordBgColor;
-      const jsCode = words
-        .map(
-          w =>
-            `document.getElementById('${w.word_id}').style.backgroundColor = '${
-              highlight ? `${highlightBGWord || COLORS.deepGold}` : ''
-            }';
-            document.getElementById('${w.word_id}').style.color = '${
-              highlight ? `${highlightedWord || ''}` : ''
-            }';
-            `,
-        )
-        .join('');
+      const wordIds = JSON.stringify(words.map(word => String(word.word_id)));
+      const jsCode = `(function() {
+        var ids = ${wordIds};
+        var bg = '${highlight ? highlightBGWord || COLORS.deepGold : ''}';
+        var color = '${highlight ? highlightedWord || '' : ''}';
+        ids.forEach(function(id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          el.style.backgroundColor = bg;
+          el.style.color = color;
+        });
+      })();`;
       webViewRef.current?.injectJavaScript(jsCode);
     },
     [soundTxtColors.wordBgColor, soundTxtColors.wordTextColor],
@@ -85,11 +86,14 @@ const useQuranPageActions = ({
 
       const aya = ayahsInPage[index];
 
-      // Build local file path for the aya
-      const fileName = aya.audio_url.split('/').pop();
-      const fileAyaName = fileName?.split('_').slice(0, 2).join('');
-
-      const localPath = `${DocumentDirectoryPath}/${fileAyaName}`;
+      const localPath = await resolvePlayableLocalAudioPath(
+        aya.audio_url,
+        'ayah',
+      );
+      if (!localPath) {
+        await playAyaSequentially(index + 1);
+        return;
+      }
 
       const isFileExists = await exists(localPath);
       if (!isFileExists && !isDownloadingRef.current) {
@@ -173,13 +177,14 @@ const useQuranPageActions = ({
           toggleHighlightWordHandler(wordId, true);
         }
 
-        // Determine local file path
-        const fileName = audioUrl.split('/').pop();
-        const fileAyaName = fileName?.split('_').slice(0, 2).join('') + '.mp3';
-        const filePath = isAyahType ? fileAyaName : fileName;
-        const localPath = `${DocumentDirectoryPath}/${filePath}`;
+        const localPath = await resolvePlayableLocalAudioPath(
+          audioUrl,
+          isAyahType ? 'ayah' : 'word',
+        );
+        if (!localPath) {
+          return;
+        }
 
-        // Check if file exists, otherwise download all audios for this page
         const isFileExists = await exists(localPath);
         if (!isFileExists && !isDownloadingRef.current) {
           isDownloadingRef.current = true;

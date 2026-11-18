@@ -1,5 +1,4 @@
-// searchService.ts
-import { executeQuery } from './connection';
+import { executeQuery, prepareParameters } from './connection';
 import { QuranAyahType } from './types/quranAyah';
 
 export type AyahType = {
@@ -17,10 +16,10 @@ export const searchAyats = async (query: string): Promise<QuranAyahType[]> => {
 
     const result = await executeQuery(
       `SELECT * FROM Ayats WHERE text_arabic LIKE ?`,
-      [`%${query}%`],
+      prepareParameters([`%${query}%`]),
     );
 
-    return result.rows;
+    return result.rows as QuranAyahType[];
   } catch {
     return [];
   }

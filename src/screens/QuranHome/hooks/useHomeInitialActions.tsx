@@ -32,33 +32,41 @@ const useHomeInitialActions = ({
   const getSavedPageSettings = useCallback(() => {
     const fontSizeWord = getItem(STORAGE_KEYS.WORD_FONT_SIZE);
     const isDarkMode = getItem(STORAGE_KEYS.IS_DARK_MODE);
-    if (fontSizeWord) {
+    if (fontSizeWord !== null) {
       dispatch(setWordFontSize(Number(fontSizeWord)));
     }
-    if (isDarkMode) {
+    if (isDarkMode !== null) {
       dispatch(setIsDarkMode(Boolean(isDarkMode)));
     }
   }, [dispatch]);
 
   useLayoutEffect(() => {
-    const init = async () => {
+    getSavedPageSettings();
+    BootSplash.hide({ fade: true });
+  }, [getSavedPageSettings]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const idleHandle = requestIdleCallback(async () => {
       try {
         const [surasData, juzsData] = await Promise.all([
           getSuras(),
           getJuzs(),
         ]);
+        if (cancelled) return;
         setSuras(surasData);
         setJuzs(juzsData);
-
-        getSavedPageSettings();
-
-        await BootSplash.hide({ fade: true });
       } catch (error) {
-        console.log('🚀 ~ init ~ error:', error);
+        console.log('🚀 ~ loadMenuMetadata ~ error:', error);
       }
+    });
+
+    return () => {
+      cancelled = true;
+      cancelIdleCallback(idleHandle);
     };
-    init();
-  }, [dispatch, getSavedPageSettings]);
+  }, []);
 
   useEffect(() => {
     getSavedPaged();
