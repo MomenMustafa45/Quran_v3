@@ -25,25 +25,31 @@ function resolveLegacyAyahAudioPath(audioUrl: string): string | null {
   return `${DocumentDirectoryPath}/${fileAyaName}`;
 }
 
+export type ResolvedLocalAudio = {
+  path: string;
+  /** Whether the file is already on disk (callers can skip their own check). */
+  exists: boolean;
+};
+
 export async function resolvePlayableLocalAudioPath(
   audioUrl: string,
   kind: LocalAudioKind,
-): Promise<string | null> {
+): Promise<ResolvedLocalAudio | null> {
   const primary = resolveLocalAudioPath(audioUrl);
   if (!primary) {
     return null;
   }
 
   if (await exists(primary)) {
-    return primary;
+    return { path: primary, exists: true };
   }
 
   if (kind === 'ayah') {
     const legacy = resolveLegacyAyahAudioPath(audioUrl);
     if (legacy && (await exists(legacy))) {
-      return legacy;
+      return { path: legacy, exists: true };
     }
   }
 
-  return primary;
+  return { path: primary, exists: false };
 }

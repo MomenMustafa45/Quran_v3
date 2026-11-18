@@ -1,7 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { getWordsByAyaID } from '../../../database/getWordsByAyaID';
 import { resolvePlayableLocalAudioPath } from '../../../utils/audioLocalPath';
-import { exists } from '@dr.pogodin/react-native-fs';
 import { downloadPageAudios } from '../../../database/downloadAudios';
 import { WebView } from 'react-native-webview';
 import Toast from 'react-native-toast-message';
@@ -86,17 +85,17 @@ const useQuranPageActions = ({
 
       const aya = ayahsInPage[index];
 
-      const localPath = await resolvePlayableLocalAudioPath(
+      const resolved = await resolvePlayableLocalAudioPath(
         aya.audio_url,
         'ayah',
       );
-      if (!localPath) {
+      if (!resolved) {
         await playAyaSequentially(index + 1);
         return;
       }
+      const localPath = resolved.path;
 
-      const isFileExists = await exists(localPath);
-      if (!isFileExists && !isDownloadingRef.current) {
+      if (!resolved.exists && !isDownloadingRef.current) {
         isDownloadingRef.current = true;
         try {
           await downloadPageAudios(pageId, p => setDownloadProgress(p));
@@ -177,16 +176,16 @@ const useQuranPageActions = ({
           toggleHighlightWordHandler(wordId, true);
         }
 
-        const localPath = await resolvePlayableLocalAudioPath(
+        const resolved = await resolvePlayableLocalAudioPath(
           audioUrl,
           isAyahType ? 'ayah' : 'word',
         );
-        if (!localPath) {
+        if (!resolved) {
           return;
         }
+        const localPath = resolved.path;
 
-        const isFileExists = await exists(localPath);
-        if (!isFileExists && !isDownloadingRef.current) {
+        if (!resolved.exists && !isDownloadingRef.current) {
           isDownloadingRef.current = true;
           try {
             await downloadPageAudios(pageId, p => setDownloadProgress(p));
