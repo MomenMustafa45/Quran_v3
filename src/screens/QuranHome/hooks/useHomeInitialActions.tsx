@@ -11,6 +11,7 @@ import { QuranJuzType } from '../../../database/types/qraunJuz';
 import BootSplash from 'react-native-bootsplash';
 import { getSuras } from '../../../database/getSuras';
 import { getJuzs } from '../../../database/getJuzs';
+import { cleanupLegacyFontCopies } from '../../../utils/loadFont';
 
 type UseHomeInitialActionsProps = {
   scrollToIndex: (pageNumber: number) => void;
@@ -57,6 +58,7 @@ const useHomeInitialActions = ({
         if (cancelled) return;
         setSuras(surasData);
         setJuzs(juzsData);
+        cleanupLegacyFontCopies();
       } catch (error) {
         console.log('🚀 ~ loadMenuMetadata ~ error:', error);
       }

@@ -6,4 +6,5 @@ export const STORAGE_KEYS = {
   DOWNLOADED_PAGES: 'downloadedPages',
   WORD_FONT_SIZE: 'wordFontSize',
   IS_DARK_MODE: 'isDarkMode',
+  LEGACY_FONTS_CLEANED: 'legacyFontsCleaned',
 };
