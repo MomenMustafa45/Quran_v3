@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import * as Progress from 'react-native-progress';
 import { getPageData } from '../../../../database/getPageData';
@@ -24,6 +24,12 @@ type QuranPageProps = {
   width: number;
 };
 
+type PagePayload = {
+  pageId: number;
+  data: QuranPageData;
+  loadedFont: string;
+};
+
 const QuranPage = ({
   pageId,
   playSound,
@@ -31,13 +37,7 @@ const QuranPage = ({
   isPortrait,
   width,
 }: QuranPageProps) => {
-  const [htmlContent, setHtmlContent] = useState<string>('');
-  const [payloadVersion, setPayloadVersion] = useState(0);
-  const pagePayloadRef = useRef<{
-    data: QuranPageData;
-    loadedFont: string;
-  } | null>(null);
-  const loadedPageIdRef = useRef<number | null>(null);
+  const [payload, setPayload] = useState<PagePayload | null>(null);
 
   const { webViewRef, handleWordClick, downloadProgress } = useQuranPageActions({
     pageId,
@@ -50,44 +50,32 @@ const QuranPage = ({
   useEffect(() => {
     let cancelled = false;
 
-    const loadPagePayload = async () => {
-      const [data, loadedFont] = await Promise.all([
-        getPageData(pageId),
-        loadFont(pageId),
-      ]);
-
-      if (cancelled) {
-        return;
-      }
-
-      pagePayloadRef.current = { data, loadedFont: loadedFont ?? '' };
-      loadedPageIdRef.current = pageId;
-      setPayloadVersion(version => version + 1);
-    };
-
-    loadPagePayload();
+    Promise.all([getPageData(pageId), loadFont(pageId)]).then(
+      ([data, loadedFont]) => {
+        if (!cancelled) {
+          setPayload({ pageId, data, loadedFont: loadedFont ?? '' });
+        }
+      },
+    );
 
     return () => {
       cancelled = true;
     };
   }, [pageId]);
 
-  useEffect(() => {
-    const payload = pagePayloadRef.current;
-    if (!payload || loadedPageIdRef.current !== pageId) {
-      return;
+  // Derived during render: one render per load, and never a stale frame.
+  const htmlContent = useMemo(() => {
+    if (!payload || payload.pageId !== pageId) {
+      return '';
     }
-
-    setHtmlContent(
-      buildPageHTML({
-        data: payload.data,
-        loadedFont: payload.loadedFont,
-        wordFontSize,
-        isDarkMode,
-        isPortrait,
-      }),
-    );
-  }, [pageId, wordFontSize, isDarkMode, isPortrait, payloadVersion]);
+    return buildPageHTML({
+      data: payload.data,
+      loadedFont: payload.loadedFont,
+      wordFontSize,
+      isDarkMode,
+      isPortrait,
+    });
+  }, [payload, pageId, wordFontSize, isDarkMode, isPortrait]);
 
   const handleWebViewMessage = useCallback(
     (event: WebViewMessageEvent) => {
