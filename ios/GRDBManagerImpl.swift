@@ -61,8 +61,11 @@ class GRDBManagerImpl: NSObject {
       try dbQueue.read { db in
         var arguments: [DatabaseValueConvertible] = []
         if let params = parameters {
-          let sortedParams = params.sorted { $0.key < $1.key }
-          for (_, value) in sortedParams {
+          // Walk param0, param1, ... in numeric order (a string sort would put
+          // param10 before param2), matching the Android implementation.
+          var index = 0
+          while let value = params["param\(index)"] {
+            index += 1
             switch value {
             case let v as String: arguments.append(v)
             case let v as Int: arguments.append(v)

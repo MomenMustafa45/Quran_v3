@@ -17,6 +17,14 @@ class GRDBManagerModule(reactContext: ReactApplicationContext) :
     companion object {
         const val NAME = "GRDBManager"
         const val DATABASE_NAME = "quran_arabic2.db"
+
+        // JS numbers arrive as Double; rawQuery binds everything as text, so
+        // 604.0 would become "604.0". Send whole numbers as "604" so they also
+        // match TEXT columns and LIKE patterns.
+        private fun formatNumberArg(value: Double): String {
+            val asLong = value.toLong()
+            return if (value == asLong.toDouble()) asLong.toString() else value.toString()
+        }
     }
 
     private var database: SQLiteDatabase? = null
@@ -78,7 +86,7 @@ class GRDBManagerModule(reactContext: ReactApplicationContext) :
                     val key = "param$index"
                     when (it.getType(key)) {
                         ReadableType.String -> params.add(it.getString(key))
-                        ReadableType.Number -> params.add(it.getDouble(key).toString())
+                        ReadableType.Number -> params.add(formatNumberArg(it.getDouble(key)))
                         ReadableType.Boolean -> params.add(if (it.getBoolean(key)) "1" else "0")
                         else -> params.add("")
                     }
