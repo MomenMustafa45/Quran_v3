@@ -7,6 +7,7 @@ import Toast from 'react-native-toast-message';
 import { useAppSelector } from '../../../store/hooks/storeHooks';
 import { COLORS } from '../../../constants/colors';
 import { getAyahsByPageId } from '../../../database/getAyahsByPageId';
+import { trackPositiveMoment } from '../../../utils/reviewPrompt';
 
 type useQuranPageActionsProps = {
   pageId: number;
@@ -80,6 +81,10 @@ const useQuranPageActions = ({
     const playAyaSequentially = async (index: number) => {
       if (index >= ayahsInPage.length) {
         currentSoundRef.current = null;
+        // Only reached by natural completion (stopping goes through onStop).
+        if (index > 0) {
+          trackPositiveMoment();
+        }
         return;
       }
 
@@ -210,6 +215,9 @@ const useQuranPageActions = ({
             if (isAyahType) toggleHighlightAyaHandler(words, false);
             else toggleHighlightWordHandler(wordId, false);
             currentSoundRef.current = null;
+            // A full ayah listened to is a good moment; single words are too
+            // frequent to count.
+            if (isAyahType) trackPositiveMoment();
           },
           () => {
             // stopped early -> remove highlight
