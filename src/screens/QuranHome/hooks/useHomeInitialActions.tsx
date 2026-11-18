@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
-import { getItem } from '../../../../storage';
+import {
+  getBooleanItem,
+  getNumberItem,
+  getStringItem,
+} from '../../../../storage';
 import {
   setIsDarkMode,
   setWordFontSize,
@@ -26,18 +30,19 @@ const useHomeInitialActions = ({
   const dispatch = useAppDispatch();
 
   const getSavedPaged = useCallback(() => {
-    const savedPage = getItem(STORAGE_KEYS.CURRENT_PAGE);
-    scrollToIndex(Number(savedPage) || 1);
+    const savedPage = getNumberItem(STORAGE_KEYS.CURRENT_PAGE);
+    scrollToIndex(savedPage || 1);
   }, [scrollToIndex]);
 
   const getSavedPageSettings = useCallback(() => {
-    const fontSizeWord = getItem(STORAGE_KEYS.WORD_FONT_SIZE);
-    const isDarkMode = getItem(STORAGE_KEYS.IS_DARK_MODE);
-    if (fontSizeWord !== null) {
-      dispatch(setWordFontSize(Number(fontSizeWord)));
+    // Font size is written as a string ("16.0") by SettingsModal.
+    const fontSizeWord = Number(getStringItem(STORAGE_KEYS.WORD_FONT_SIZE));
+    const isDarkMode = getBooleanItem(STORAGE_KEYS.IS_DARK_MODE);
+    if (Number.isFinite(fontSizeWord) && fontSizeWord > 0) {
+      dispatch(setWordFontSize(fontSizeWord));
     }
-    if (isDarkMode !== null) {
-      dispatch(setIsDarkMode(Boolean(isDarkMode)));
+    if (isDarkMode !== undefined) {
+      dispatch(setIsDarkMode(isDarkMode));
     }
   }, [dispatch]);
 

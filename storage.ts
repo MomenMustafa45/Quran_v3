@@ -2,32 +2,22 @@ import { MMKV } from 'react-native-mmkv';
 
 export const storage = new MMKV();
 
+// MMKV does not store a value's type, so a value must be read with the getter
+// matching how it was written. Reading a number key with getString (as the old
+// generic getItem did first) is not guaranteed to return undefined.
+
 export const setItem = (key: string, value: string | number | boolean) => {
   storage.set(key, value);
 };
 
-export const getItem = (key: string): string | number | boolean | null => {
-  if (!storage.contains(key)) {
-    return null;
-  }
+export const getStringItem = (key: string): string | undefined =>
+  storage.getString(key);
 
-  const stringValue = storage.getString(key);
-  if (stringValue !== undefined) {
-    return stringValue;
-  }
+export const getNumberItem = (key: string): number | undefined =>
+  storage.getNumber(key);
 
-  const numberValue = storage.getNumber(key);
-  if (numberValue !== undefined) {
-    return numberValue;
-  }
-
-  const booleanValue = storage.getBoolean(key);
-  if (booleanValue !== undefined) {
-    return booleanValue;
-  }
-
-  return null;
-};
+export const getBooleanItem = (key: string): boolean | undefined =>
+  storage.getBoolean(key);
 
 export const removeItem = (key: string) => {
   storage.delete(key);

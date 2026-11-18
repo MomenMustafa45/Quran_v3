@@ -8,7 +8,7 @@ import {
   unlink,
 } from '@dr.pogodin/react-native-fs';
 import { LruCache } from './lruCache';
-import { getItem, setItem } from '../../storage';
+import { getBooleanItem, setItem } from '../../storage';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 
 // Each page font is ~150 KB on disk (~200 KB as base64). Keep only the pages
@@ -61,7 +61,7 @@ export async function cleanupLegacyFontCopies(): Promise<void> {
   if (Platform.OS !== 'android') {
     return;
   }
-  if (getItem(STORAGE_KEYS.LEGACY_FONTS_CLEANED) === true) {
+  if (getBooleanItem(STORAGE_KEYS.LEGACY_FONTS_CLEANED)) {
     return;
   }
 

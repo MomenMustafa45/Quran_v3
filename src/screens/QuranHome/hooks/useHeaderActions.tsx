@@ -8,7 +8,7 @@ import {
 import { getJuzByPage } from '../utils/getJuzByPage';
 import { linearSearchSurah } from '../utils/getSurahByPage';
 import { setSoundType, SoundType } from '../../../store/slices/pageSlice';
-import { getItem, setItem } from '../../../../storage';
+import { getStringItem, setItem } from '../../../../storage';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
 
 type UseHeaderActionsProps = {
@@ -36,9 +36,9 @@ const useHeaderActions = ({ suras, juzs }: UseHeaderActionsProps) => {
   }, [dispatch, soundType]);
 
   const getInitialSoundType = useCallback(() => {
-    const storageSoundType = getItem(STORAGE_KEYS.SOUND_TYPE);
+    const storageSoundType = getStringItem(STORAGE_KEYS.SOUND_TYPE);
     if (storageSoundType) {
-      dispatch(setSoundType(String(storageSoundType) as SoundType));
+      dispatch(setSoundType(storageSoundType as SoundType));
     }
   }, [dispatch]);
 

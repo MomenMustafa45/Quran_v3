@@ -6,7 +6,7 @@ import { styles } from './styles';
 import { COLORS } from '../../../constants/colors';
 import AppColorPick, { ColorPickMode } from '../../AppColorPick/AppColorPick';
 import { STORAGE_KEYS } from '../../../constants/storageKeys';
-import { getItem, setItem } from '../../../../storage';
+import { getStringItem, setItem } from '../../../../storage';
 import {
   setIsDarkMode,
   setSoundColors,
@@ -42,8 +42,8 @@ const SettingsModal = ({ visible, onClose }: SettingsModalProps) => {
   const dispatch = useAppDispatch();
 
   const getStoredColor = useCallback(() => {
-    const storedTextColor = getItem(STORAGE_KEYS.LISTEN_WORD_COLOR);
-    const storedBgTextColor = getItem(STORAGE_KEYS.LISTEN_WORD_BG_COLOR);
+    const storedTextColor = getStringItem(STORAGE_KEYS.LISTEN_WORD_COLOR);
+    const storedBgTextColor = getStringItem(STORAGE_KEYS.LISTEN_WORD_BG_COLOR);
 
     const soundColorsObj: SoundColorsType = {
       wordTextColor: soundColors.wordTextColor,

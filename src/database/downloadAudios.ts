@@ -6,7 +6,7 @@ import {
 } from '@dr.pogodin/react-native-fs';
 import { executeQuery, prepareParameters } from './connection';
 import Toast from 'react-native-toast-message';
-import { getItem, setItem } from '../../storage';
+import { getStringItem, setItem } from '../../storage';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 
 const TOTAL_QURAN_PAGES = 604;
@@ -100,7 +100,7 @@ async function downloadWithRetry(
 }
 
 function markPageAsDownloaded(pageId: number) {
-  const stored = getItem(STORAGE_KEYS.DOWNLOADED_PAGES) as string | undefined;
+  const stored = getStringItem(STORAGE_KEYS.DOWNLOADED_PAGES);
   const downloadedPages: Record<number, true> = stored
     ? JSON.parse(stored)
     : {};
