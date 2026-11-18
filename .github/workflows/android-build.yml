@@ -24,8 +24,9 @@ jobs:
           bundler-cache: true
           working-directory: android
 
+      # Needed on PRs too: gradle.properties always points the release signing
+      # config at qurany.keystore, so bundleRelease fails without it.
       - name: Decode Keystore
-        if: github.event_name == 'push'
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/qurany.keystore
 
       - name: Decode Play Store JSON Key
