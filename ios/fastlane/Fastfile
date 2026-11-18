@@ -44,9 +44,12 @@ platform :ios do
   private_lane :prepare_app_store_build do |options|
     api_key = options[:api_key]
 
+    # On CI only fetch existing certs/profiles; never create or rotate them
+    # in the certificates repo from a build job.
     match(
       type: "appstore",
-      api_key: api_key
+      api_key: api_key,
+      readonly: is_ci
     )
 
     profile_name = match_appstore_profile_name
