@@ -19,23 +19,58 @@ const WORD_CLICK_DELEGATION_SCRIPT = `
 </script>
 `;
 
+/**
+ * Visual settings that can change after a page is loaded. They are applied
+ * as CSS custom properties on <html>, so changing them only needs a small
+ * injected script (applyAppearanceScript) instead of rebuilding and
+ * reloading the whole page (which embeds a ~200 KB base64 font).
+ */
+export type PageAppearance = {
+  wordFontSize: number;
+  isDarkMode: boolean;
+  isPortrait: boolean;
+};
+
+const getAppearanceVars = ({
+  wordFontSize,
+  isDarkMode,
+  isPortrait,
+}: PageAppearance): Record<string, string> => ({
+  '--word-font-size': `${wordFontSize}vw`,
+  '--text-color': isDarkMode ? COLORS.whiteGray : COLORS.dark,
+  '--line-height': isPortrait ? '6.5vh' : '8.5vw',
+  '--title-height': isPortrait ? '6.5vh' : '6.5vw',
+  '--title-margin': isPortrait ? '0' : '40px',
+});
+
+const toInlineStyle = (vars: Record<string, string>) =>
+  Object.entries(vars)
+    .map(([name, value]) => `${name}:${value}`)
+    .join(';');
+
+export const applyAppearanceScript = (appearance: PageAppearance): string =>
+  `(function () {
+    var vars = ${JSON.stringify(getAppearanceVars(appearance))};
+    var style = document.documentElement.style;
+    Object.keys(vars).forEach(function (name) {
+      style.setProperty(name, vars[name]);
+    });
+  })();
+  true;`;
+
 type BuildPageHTMLParamTypes = {
   data: QuranPageData;
   loadedFont: string;
-  wordFontSize: number;
-  isDarkMode: boolean;
-  isPortrait?: boolean;
+  appearance: PageAppearance;
 };
 
 export const buildPageHTML = ({
   data,
   loadedFont,
-  wordFontSize,
-  isDarkMode,
-  isPortrait,
+  appearance,
 }: BuildPageHTMLParamTypes) => {
   return `
-    <html lang="ar">
+    <html lang="ar" style="${toInlineStyle(getAppearanceVars(appearance))}">
       <head>
         <meta charset="UTF-8" />
         <style>
@@ -75,7 +110,7 @@ export const buildPageHTML = ({
             align-items: center;
             width: 100%;
             white-space: nowrap;
-            height:${isPortrait ? '6.5vh' : '8.5vw'};
+            height: var(--line-height);
           }
           .line.center {
             justify-content: center;
@@ -84,22 +119,24 @@ export const buildPageHTML = ({
             justify-content: space-between;
           }
           .word {
-            font-size: calc(${wordFontSize}vw * 0.99);
+            font-size: calc(var(--word-font-size) * 0.99);
             white-space: nowrap;
             font-weight:bold;
-            color:${isDarkMode ? COLORS.whiteGray : COLORS.dark};
+            color: var(--text-color);
           }
             .surah_title{
             display: flex;
             width: 100%;
             white-space: nowrap;
-            height:6.5${isPortrait ? 'vh' : 'vw'};
+            height: var(--title-height);
             justify-content: center;
             align-items: center;
-            // overflow: hidden;
-            color:${isDarkMode ? COLORS.whiteGray : COLORS.dark};
-            margin: ${isPortrait ? '0' : '40px'} 0;
+            color: var(--text-color);
+            margin: var(--title-margin) 0;
             }
+          .surah_title text {
+            fill: var(--text-color);
+          }
         </style>
       </head>
       <body class="fadeIn">
@@ -122,8 +159,7 @@ export const buildPageHTML = ({
           dominant-baseline="middle"
           text-anchor="middle"
           font-size="16"
-          font-family="UthmanicHafs, 'Scheherazade New', serif"
-          fill=${isDarkMode ? COLORS.whiteGray : COLORS.dark}>
+          font-family="UthmanicHafs, 'Scheherazade New', serif">
       ${l.line.surah_name || ''}
     </text>
 </svg>

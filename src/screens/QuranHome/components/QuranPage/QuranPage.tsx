@@ -1,9 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import * as Progress from 'react-native-progress';
 import { getPageData } from '../../../../database/getPageData';
 import { QuranPageData } from '../../../../database/types/quranPageData';
-import { buildPageHTML } from '../../../../utils/buildPageHTML';
+import {
+  applyAppearanceScript,
+  buildPageHTML,
+  PageAppearance,
+} from '../../../../utils/buildPageHTML';
 import useQuranPageActions from '../../hooks/useQuranPageActions';
 import { COLORS } from '../../../../constants/colors';
 import AppText from '../../../../components/AppText/AppText';
@@ -28,6 +32,8 @@ type PagePayload = {
   pageId: number;
   data: QuranPageData;
   loadedFont: string;
+  /** Appearance at load time; later changes are injected, not rebuilt. */
+  initialAppearance: PageAppearance;
 };
 
 const QuranPage = ({
@@ -47,13 +53,28 @@ const QuranPage = ({
   const wordFontSize = useAppSelector(state => state.page.wordFontSize);
   const isDarkMode = useAppSelector(state => state.page.isDarkMode);
 
+  const appearance = useMemo<PageAppearance>(
+    () => ({ wordFontSize, isDarkMode, isPortrait }),
+    [wordFontSize, isDarkMode, isPortrait],
+  );
+  // Latest appearance for async callbacks (page load, WebView onLoadEnd).
+  const appearanceRef = useRef(appearance);
+  useEffect(() => {
+    appearanceRef.current = appearance;
+  }, [appearance]);
+
   useEffect(() => {
     let cancelled = false;
 
     Promise.all([getPageData(pageId), loadFont(pageId)]).then(
       ([data, loadedFont]) => {
         if (!cancelled) {
-          setPayload({ pageId, data, loadedFont: loadedFont ?? '' });
+          setPayload({
+            pageId,
+            data,
+            loadedFont: loadedFont ?? '',
+            initialAppearance: appearanceRef.current,
+          });
         }
       },
     );
@@ -63,7 +84,8 @@ const QuranPage = ({
     };
   }, [pageId]);
 
-  // Derived during render: one render per load, and never a stale frame.
+  // Built once per page load. Appearance changes do NOT rebuild it: they are
+  // pushed into the loaded document below, so the WebView never reloads.
   const htmlContent = useMemo(() => {
     if (!payload || payload.pageId !== pageId) {
       return '';
@@ -71,11 +93,26 @@ const QuranPage = ({
     return buildPageHTML({
       data: payload.data,
       loadedFont: payload.loadedFont,
-      wordFontSize,
-      isDarkMode,
-      isPortrait,
+      appearance: payload.initialAppearance,
     });
-  }, [payload, pageId, wordFontSize, isDarkMode, isPortrait]);
+  }, [payload, pageId]);
+
+  const applyAppearance = useCallback(
+    (value: PageAppearance) => {
+      webViewRef.current?.injectJavaScript(applyAppearanceScript(value));
+    },
+    [webViewRef],
+  );
+
+  useEffect(() => {
+    applyAppearance(appearance);
+  }, [appearance, applyAppearance]);
+
+  // A setting changed while the document was still loading would be lost, so
+  // re-apply the latest appearance once it has loaded.
+  const handleLoadEnd = useCallback(() => {
+    applyAppearance(appearanceRef.current);
+  }, [applyAppearance]);
 
   const handleWebViewMessage = useCallback(
     (event: WebViewMessageEvent) => {
@@ -126,6 +163,7 @@ const QuranPage = ({
             { backgroundColor: isDarkMode ? COLORS.dark : COLORS.whiteGray },
           ]}
           onMessage={handleWebViewMessage}
+          onLoadEnd={handleLoadEnd}
           setSupportMultipleWindows={false}
           androidLayerType="hardware"
           showsVerticalScrollIndicator={false}
