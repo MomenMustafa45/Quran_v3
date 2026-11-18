@@ -66,13 +66,30 @@ async function fetchPageDataFromDb(pageId: number): Promise<PageDataResult> {
   };
 }
 
-export async function getPageData(pageId: number): Promise<PageDataResult> {
+// Concurrent requests for the same page (e.g. a remount during the initial
+// scrollToIndex) share one DB round-trip instead of each querying.
+const inFlight = new Map<number, Promise<PageDataResult>>();
+
+export function getPageData(pageId: number): Promise<PageDataResult> {
   const cached = getCachedPageData(pageId);
   if (cached) {
-    return cached;
+    return Promise.resolve(cached);
   }
 
-  const result = await fetchPageDataFromDb(pageId);
-  setCachedPageData(pageId, result);
-  return result;
+  const pending = inFlight.get(pageId);
+  if (pending) {
+    return pending;
+  }
+
+  const request = fetchPageDataFromDb(pageId)
+    .then(result => {
+      setCachedPageData(pageId, result);
+      return result;
+    })
+    .finally(() => {
+      inFlight.delete(pageId);
+    });
+
+  inFlight.set(pageId, request);
+  return request;
 }

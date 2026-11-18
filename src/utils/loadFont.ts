@@ -25,14 +25,30 @@ const formatPageId = (pageId: number) => {
   return String(pageId).padStart(3, '0');
 };
 
-export const loadFont = async (
-  pageNumber: number,
-): Promise<string | undefined> => {
+// Concurrent loads of the same page font share one native read.
+const inFlight = new Map<number, Promise<string | undefined>>();
+
+export const loadFont = (pageNumber: number): Promise<string | undefined> => {
   const cached = fontBase64Cache.get(pageNumber);
   if (cached) {
-    return cached;
+    return Promise.resolve(cached);
   }
 
+  const pending = inFlight.get(pageNumber);
+  if (pending) {
+    return pending;
+  }
+
+  const request = readFontBase64(pageNumber).finally(() => {
+    inFlight.delete(pageNumber);
+  });
+  inFlight.set(pageNumber, request);
+  return request;
+};
+
+const readFontBase64 = async (
+  pageNumber: number,
+): Promise<string | undefined> => {
   try {
     const fileName = `${formatPageId(pageNumber)}.ttf`;
 
