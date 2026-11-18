@@ -6,8 +6,13 @@ import {
   MainBundlePath,
   readFile,
 } from '@dr.pogodin/react-native-fs';
+import { LruCache } from './lruCache';
 
-const fontBase64Cache = new Map<number, string>();
+// Each page font is ~150 KB on disk (~200 KB as base64). Keep only the pages
+// around the reader in memory; an unbounded cache grows to ~120 MB after a
+// full read-through.
+const MAX_CACHED_FONTS = 15;
+const fontBase64Cache = new LruCache<number, string>(MAX_CACHED_FONTS);
 
 const formatPageId = (pageId: number) => {
   return String(pageId).padStart(3, '0');
@@ -51,7 +56,3 @@ export const loadFont = async (
     return undefined;
   }
 };
-
-export function clearFontCache(): void {
-  fontBase64Cache.clear();
-}
