@@ -3,6 +3,7 @@ import {
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
   useWindowDimensions,
 } from 'react-native';
 import Sound from 'react-native-sound';
@@ -14,6 +15,15 @@ import { STORAGE_KEYS } from '../../../constants/storageKeys';
 import { getRTLPageNumber } from '../../../utils/getRLTPageNumber';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { landScapeBtnWidth } from '../../../constants/desingSystem';
+
+// iOS: react-native-sound never sets an audio session category, so iOS uses
+// SoloAmbient, which the ring/silent switch mutes. Recitation must be heard
+// in silent mode, like any audio app, so use Playback. 'SpokenAudio' mode
+// tunes the session for speech. Guarded to iOS: these calls are iOS-only.
+if (Platform.OS === 'ios') {
+  Sound.setCategory('Playback');
+  Sound.setMode('SpokenAudio');
+}
 
 const useQuranHomeActions = () => {
   const flatListRef = useRef<FlatList<number>>(null);
