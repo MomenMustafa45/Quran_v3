@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import QuranHome from '../screens/QuranHome/QuranHome';
 import {
   getCrashlytics,
@@ -14,7 +14,10 @@ export type AppStackParamList = {
   QuranHome: undefined;
 };
 
-const Stack = createStackNavigator<AppStackParamList>();
+// Native stack: uses platform navigation primitives via react-native-screens,
+// and (unlike @react-navigation/stack) never touches the deprecated
+// InteractionManager.
+const Stack = createNativeStackNavigator<AppStackParamList>();
 const crashlytics = getCrashlytics();
 
 const AppContainer = () => {
