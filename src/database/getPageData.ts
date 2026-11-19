@@ -14,17 +14,25 @@ export interface PageDataResult {
   }>;
 }
 
+// surah_name and basmallah lines have NULL first/last_word_id; only ayah
+// lines carry a word range.
+const hasWordRange = (line: QuranLineType): boolean =>
+  typeof line.first_word_id === 'number' &&
+  typeof line.last_word_id === 'number';
+
 function groupWordsByLine(
   lines: QuranLineType[],
   words: QuranWordType[],
 ): PageDataResult['lines'] {
   return lines.map(line => ({
     line,
-    words: words.filter(
-      word =>
-        word.word_id >= line.first_word_id &&
-        word.word_id <= line.last_word_id,
-    ),
+    words: hasWordRange(line)
+      ? words.filter(
+          word =>
+            word.word_id >= line.first_word_id &&
+            word.word_id <= line.last_word_id,
+        )
+      : [],
   }));
 }
 
@@ -50,8 +58,17 @@ async function fetchPageDataFromDb(pageId: number): Promise<PageDataResult> {
 
   const surahName: string = suraResult.rows[0]?.name_arabic || '';
 
-  const minWordId = Math.min(...lines.map(line => line.first_word_id));
-  const maxWordId = Math.max(...lines.map(line => line.last_word_id));
+  // Must ignore the NULL ranges of title/basmallah lines: Math.min(null, n)
+  // is 0, which turned the query into "BETWEEN 0 AND max" and loaded every
+  // word from the start of the Quran (~83k rows on page 600) for any page
+  // that starts a surah.
+  const ayahLines = lines.filter(hasWordRange);
+  if (ayahLines.length === 0) {
+    return { surah: surahName, lines: groupWordsByLine(lines, []) };
+  }
+
+  const minWordId = Math.min(...ayahLines.map(line => line.first_word_id));
+  const maxWordId = Math.max(...ayahLines.map(line => line.last_word_id));
 
   const wordResult = await executeQuery(
     `SELECT * FROM Words WHERE word_id BETWEEN ? AND ? ORDER BY word_id;`,
